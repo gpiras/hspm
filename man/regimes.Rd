@@ -2,45 +2,21 @@
 % Please edit documentation in R/regimes.R
 \name{regimes}
 \alias{regimes}
-\alias{print.spregimes}
-\alias{summary.spregimes}
 \title{Estimation of spatial regime models}
 \usage{
-regimes(
-  formula,
-  data,
-  splitv,
-  vc = c("homoskedastic", "groupwise", "heteroskedastic")
-)
-
-\method{print}{spregimes}(x, digits = max(3, getOption("digits") - 3), ...)
-
-\method{summary}{spregimes}(object, ...)
+regimes(formula, data, rgv = NULL, vc = c("homoskedastic", "groupwise"))
 }
 \arguments{
 \item{formula}{a symbolic description of the model.}
 
 \item{data}{the data of class \code{data.frame}.}
 
-\item{splitv}{variable to split the dataset}
+\item{rgv}{variable to identify the regimes}
 
-\item{vc}{one of ("homoskedastic", "groupwise","heteroskedastic")}
-
-\item{x}{object for printing}
-
-\item{digits}{number of digits}
-
-\item{...}{additional arguments to be passed}
-
-\item{object}{object for printing}
+\item{vc}{one of ("homoskedastic", "groupwise")}
 }
 \value{
-An object of class ``\code{spregimes}'', a list with elements:
-\item{coefficients}{the estimated coefficients,}
-\item{call}{the matched call,}
-\item{X}{the X matrix}
-\item{y}{the dependent variable}
-#' @import Matrix stats spatialreg methods Formula maxLik sphet
+An object of class ``\code{lm}'', a list with elements:
 }
 \description{
 Estimation of spatial regime models
