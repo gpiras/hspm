@@ -2,9 +2,24 @@
 % Please edit documentation in R/regimes.R
 \name{regimes}
 \alias{regimes}
+\alias{coef.regimes}
+\alias{vcov.regimes}
+\alias{print.regimes}
+\alias{summary.regimes}
+\alias{print.summary.regimes}
 \title{Estimation of spatial regime models}
 \usage{
 regimes(formula, data, rgv = NULL, vc = c("homoskedastic", "groupwise"))
+
+\method{coef}{regimes}(object, ...)
+
+\method{vcov}{regimes}(object, ...)
+
+\method{print}{regimes}(x, digits = max(3, getOption("digits") - 3), ...)
+
+\method{summary}{regimes}(object, ...)
+
+\method{print}{summary.regimes}(x, digits = max(5, getOption("digits") - 3), ...)
 }
 \arguments{
 \item{formula}{a symbolic description of the model.}
@@ -14,6 +29,14 @@ regimes(formula, data, rgv = NULL, vc = c("homoskedastic", "groupwise"))
 \item{rgv}{variable to identify the regimes}
 
 \item{vc}{one of ("homoskedastic", "groupwise")}
+
+\item{object}{an object of class ivregime}
+
+\item{...}{additional arguments}
+
+\item{x}{an object of class ivregime}
+
+\item{digits}{number of digits}
 }
 \value{
 An object of class ``\code{lm}'', a list with elements:

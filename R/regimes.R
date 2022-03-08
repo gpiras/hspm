@@ -8,7 +8,10 @@
 #' @param data the data of class \code{data.frame}.
 #' @param rgv variable to identify the regimes
 #' @param vc   one of ("homoskedastic", "groupwise")
-#'
+#' @param object an object of class ivregime
+#' @param ... additional arguments
+#' @param x an object of class ivregime
+#' @param digits number of digits
 #' @details
 #'
 #' The model estimated is:
@@ -35,6 +38,7 @@ regimes <- function(formula, data, rgv = NULL,
 
   #Obtain arguments
   vc                <- match.arg(vc)
+  cl                <- match.call()
 
   #process the data
   intro    <- data.prep.regimes(formula = formula, data = data, rgv = rgv)
@@ -44,6 +48,7 @@ regimes <- function(formula, data, rgv = NULL,
   # formula
   # k tot number of variables in model
   # totr tot of variables varying by regime
+
   dataset  <- intro[[1]]
   form     <- intro[[2]]
   k        <- intro[[3]]
@@ -56,7 +61,9 @@ if (vc == "groupwise")  res <- groupwise.regimes(form, dataset, k, k1, k2, rgm, 
 
 if (vc == "homoskedastic")  res <- lm(form, dataset)
 
-  #class(res) <- "spregimes"
+
+
+class(res) <- c("regimes", "lm")
 return(res)
   }
 
@@ -68,7 +75,6 @@ groupwise.regimes <- function(formula, data, k, k1, k2, rgm, sv){
 
 
   fs <- lm(formula, data)
-  uhat <- residuals(fs)
   nobsg <- colSums(rgm)
 
   omega <- vector("numeric", length = nrow(data))
@@ -77,7 +83,11 @@ groupwise.regimes <- function(formula, data, k, k1, k2, rgm, sv){
   data$omega <- omega
   res <-  lm(formula, data, weights = omega)
 
-  return(res)
+  uhat <- vector("numeric", length = nrow(data))
+  for (i in 1: sv) uhat[which(as.numeric(rgm[,i])==1)] <-  residuals(lm(formula, data[which(as.numeric(rgm[,i])==1),] ))
+  fs$residuals <- uhat
+
+  return(list(res, fs))
 }
 
 homoskedastic.regimes <- function(formula, dataset){
@@ -97,7 +107,8 @@ data.prep.regimes <- function(formula, data, rgv){
   f1 <- Formula(formula)
   mt <- terms(f1, data = data)
   mf1 <- model.frame(f1, data = data)
-  y <- model.response(mf1)
+  y <- as.matrix(model.response(mf1))
+  namey <- colnames(y) <- all.vars(f1)[[1]]
 
   k1 <- NULL
   k2 <- NULL
@@ -125,8 +136,8 @@ data.prep.regimes <- function(formula, data, rgv){
     for(i in 1:sv) xr[,seq_1[i]:seq_2[i]] <- x2 * rgm[,i]
 
     data <- data.frame(y, x1,xr)
-    colnames(data) <- c("y", namesx1, namesxr)
-    form <- as.formula(paste("y ~", paste(names(data)[2:(k+1)], collapse =  " + "), "-1"))
+    colnames(data) <- c(namey, namesx1, namesxr)
+    form <- as.formula(paste(namey," ~", paste(names(data)[2:(k+1)], collapse =  " + "), "-1"))
 
   }
   else{
@@ -145,14 +156,99 @@ data.prep.regimes <- function(formula, data, rgv){
     for(i in 1:sv)     xr[,seq_1[i]:seq_2[i]] <- x * rgm[,i]
     data <- data.frame(y,xr)
 
-    colnames(data) <- c("y" ,namesxr)
+    colnames(data) <- c(namey ,namesxr)
 
-    if("Intercept_1" %in% namesxr)  form <- as.formula(paste("y ~", paste(names(data)[2:(totc+1)], collapse =  " + "), "-1"))
-    else form <- as.formula(paste("y ~", paste(names(data)[2:(totc+1)], collapse =  " + ")))
+    if("Intercept_1" %in% namesxr)  form <- as.formula(paste(namey,"~", paste(names(data)[2:(totc+1)], collapse =  " + "), "-1"))
+    else form <- as.formula(paste(namey,"~", paste(names(data)[2:(totc+1)], collapse =  " + ")))
 
   }
 
 
   ret <- list(data, form, k, k1, k2, rgm, sv)
 return(ret)
+}
+
+
+
+
+### S3 methods ----
+
+#' @rdname regimes
+#' @method coef regimes
+#' @export
+coef.regimes <- function(object, ...){
+  if(is.list((object))) object[[1]]$coefficients
+  else object$coefficients
+}
+
+
+#' @rdname regimes
+#' @method vcov regimes
+#' @import stats
+#' @export
+vcov.regimes <- function(object, ...){
+  if(is.list((object))) V <- vcov(object[[1]])
+  else  V <- vcov(object)
+  return(V)
+}
+
+
+#' @rdname regimes
+#' @method print regimes
+#' @import stats
+#' @export
+print.regimes <- function(x,
+                         digits = max(3, getOption("digits") - 3),
+                         ...)
+{
+  # cat("Call:\n")
+  # if(is.list((x))) print(x[[1]]$call)
+  # else print(x$call)
+  cat("\nCoefficients:\n")
+
+  if(is.list((x))) print.default(format(drop(coef(x[[2]])), digits = digits), print.gap = 2,
+                                 quote = FALSE)
+  else print.default(format(drop(coef(x)), digits = digits), print.gap = 2,
+                     quote = FALSE)
+  cat("\n")
+  invisible(x)
+}
+
+
+
+#' @rdname regimes
+#' @method summary regimes
+#' @import stats
+#' @export
+summary.regimes <- function(object, ...){
+  b                   <- coef(object)
+  std.err             <- sqrt(diag(vcov(object)))
+  z                   <- b / std.err
+  p                   <- 2 * (1 - pnorm(abs(z)))
+  CoefTable           <- cbind(b, std.err, z, p)
+  colnames(CoefTable) <- c("Estimate", "Std. Error", "z-value", "Pr(>|z|)")
+  object$CoefTable    <- CoefTable
+  class(object)       <- c("summary.regimes", "regimes")
+  return(object)
+}
+
+
+#' @rdname regimes
+#' @method print summary.regimes
+#' @import stats
+#' @export
+print.summary.regimes <- function(x,
+                                 digits = max(5, getOption("digits") - 3),
+                                 ...)
+{
+  cat("        ------------------------------------------------------------\n")
+  cat("                           Regimes Model \n")
+  cat("        ------------------------------------------------------------\n")
+#   cat("\nCall:\n")
+# if((is.list((x))))  cat(paste(deparse(x[[1]]$call), sep = "\n", collapse = "\n"), "\n\n", sep = "")
+# else cat(paste(deparse(x$call), sep = "\n", collapse = "\n"), "\n\n", sep = "")
+  cat("\nCoefficients:\n")
+  printCoefmat(x$CoefTable, digits = digits, P.values = TRUE, has.Pvalue = TRUE)
+
+   invisible(x)
 }
