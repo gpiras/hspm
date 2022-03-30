@@ -53,6 +53,20 @@ y_{ij}= \mathbf{x_{ij,k}}\beta_j + \epsilon
 for i=1,..,n representing the sample observations, and j =1,..., J representing
 the  regimes
 }
+\examples{
+data("baltim")
+nbB <- spdep::read.gal(system.file("extdata", "baltimore.gal", package = "spregimes"))
+listw1 <- spdep::nb2listw(nbB, style = "W")
+form   <- PRICE  ~ NROOM + NBATH + PATIO + FIREPL + AC + GAR + AGE + LOTSZ + SQFT
+split  <- ~ CITCOU
+mod <- regimes(formula = form, data = baltim, rgv = split, vc = "groupwise")
+summary(mod)
+form <- PRICE  ~ AC + AGE + NROOM + PATIO + FIREPL + SQFT | NBATH + GAR + LOTSZ - 1
+mod <- regimes(form, baltim, split, vc = "groupwise")
+summary(mod)
+
+
+}
 \author{
 Gianfranco Piras and Mauricio Sarrias
 }

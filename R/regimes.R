@@ -22,10 +22,22 @@
 #' for i=1,..,n representing the sample observations, and j =1,..., J representing
 #' the  regimes
 #'
+#' @examples
+#' data("baltim")
+#' nbB <- spdep::read.gal(system.file("extdata", "baltimore.gal", package = "spregimes"))
+#' listw1 <- spdep::nb2listw(nbB, style = "W")
+#' form   <- PRICE  ~ NROOM + NBATH + PATIO + FIREPL + AC + GAR + AGE + LOTSZ + SQFT
+#' split  <- ~ CITCOU
+#' mod <- regimes(formula = form, data = baltim, rgv = split, vc = "groupwise")
+#' summary(mod)
+#' form <- PRICE  ~ AC + AGE + NROOM + PATIO + FIREPL + SQFT | NBATH + GAR + LOTSZ - 1
+#' mod <- regimes(form, baltim, split, vc = "groupwise")
+#' summary(mod)
+#'
 #'
 #' @author Gianfranco Piras and Mauricio Sarrias
 #' @return An object of class ``\code{lm}'', a list with elements:
-#' @import Formula sphet stats
+#' @import Formula sphet stats spdep
 #' @export
 
 regimes <- function(formula, data, rgv = NULL,
@@ -61,7 +73,7 @@ if (vc == "groupwise")  res <- groupwise.regimes(form, dataset, k, k1, k2, rgm, 
 
 if (vc == "homoskedastic")  res <- lm(form, dataset)
 
-
+ res <- list(res, cl)
 
 class(res) <- c("regimes", "lm")
 return(res)
@@ -82,12 +94,12 @@ groupwise.regimes <- function(formula, data, k, k1, k2, rgm, sv){
 
   data$omega <- omega
   res <-  lm(formula, data, weights = omega)
+  # uhat <- vector("numeric", length = nrow(data))
+  # for (i in 1: sv) uhat[which(as.numeric(rgm[,i])==1)] <-  residuals(lm(formula, data[which(as.numeric(rgm[,i])==1),] ))
+  # fs$residuals <- uhat
 
-  uhat <- vector("numeric", length = nrow(data))
-  for (i in 1: sv) uhat[which(as.numeric(rgm[,i])==1)] <-  residuals(lm(formula, data[which(as.numeric(rgm[,i])==1),] ))
-  fs$residuals <- uhat
 
-  return(list(res, fs))
+  return(res)
 }
 
 homoskedastic.regimes <- function(formula, dataset){
@@ -177,8 +189,7 @@ return(ret)
 #' @method coef regimes
 #' @export
 coef.regimes <- function(object, ...){
-  if(is.list((object))) object[[1]]$coefficients
-  else object$coefficients
+ object[[1]]$coefficients
 }
 
 
@@ -187,8 +198,8 @@ coef.regimes <- function(object, ...){
 #' @import stats
 #' @export
 vcov.regimes <- function(object, ...){
-  if(is.list((object))) V <- vcov(object[[1]])
-  else  V <- vcov(object)
+
+  V <- vcov(object[[1]])
   return(V)
 }
 
@@ -201,15 +212,14 @@ print.regimes <- function(x,
                          digits = max(3, getOption("digits") - 3),
                          ...)
 {
-  # cat("Call:\n")
-  # if(is.list((x))) print(x[[1]]$call)
-  # else print(x$call)
+  cat("Call:\n")
+  print(x[[2]])
+
   cat("\nCoefficients:\n")
 
-  if(is.list((x))) print.default(format(drop(coef(x[[2]])), digits = digits), print.gap = 2,
+  print.default(format(drop(coef(x[[1]])), digits = digits), print.gap = 2,
                                  quote = FALSE)
-  else print.default(format(drop(coef(x)), digits = digits), print.gap = 2,
-                     quote = FALSE)
+
   cat("\n")
   invisible(x)
 }
@@ -244,9 +254,10 @@ print.summary.regimes <- function(x,
   cat("        ------------------------------------------------------------\n")
   cat("                           Regimes Model \n")
   cat("        ------------------------------------------------------------\n")
-#   cat("\nCall:\n")
-# if((is.list((x))))  cat(paste(deparse(x[[1]]$call), sep = "\n", collapse = "\n"), "\n\n", sep = "")
-# else cat(paste(deparse(x$call), sep = "\n", collapse = "\n"), "\n\n", sep = "")
+
+  cat("\nCall:\n")
+  cat(paste(deparse(x[[2]]), sep = "\n", collapse = "\n"), "\n\n", sep = "")
+
   cat("\nCoefficients:\n")
   printCoefmat(x$CoefTable, digits = digits, P.values = TRUE, has.Pvalue = TRUE)
 
