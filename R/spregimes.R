@@ -27,7 +27,7 @@
 #'
 #' @author Gianfranco Piras and Mauricio Sarrias
 #' @return An object of class ``\code{lag_regimes}'', or \code{sarar_regimes}, or \code{error_regimes}
-#' @import Formula sphet stats Matrix
+#' @import Matrix Formula sphet stats
 #' @export
 
 

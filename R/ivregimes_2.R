@@ -6,7 +6,7 @@
 #' @param formula a symbolic description of the model.
 #' @param data the data of class \code{data.frame}.
 #' @param rgv variable to identify the regimes
-#' @param vc   one of ("classical", "robust", "OGMM")
+#' @param vc   one of ('classical', 'robust', 'OGMM')
 #' @param object an object of class ivregime
 #' @param ... additional arguments
 #' @param x an object of class ivregime

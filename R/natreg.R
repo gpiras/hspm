@@ -1,0 +1,83 @@
+#' US Counties Homicides
+#'
+#' Continental U.S. counties data for homicides and selected socio-economic characteristics. Data for four decennial census years: 1960, 1970, 1980 and 1990.
+#'
+#' @format A data frame with 3085 rows and 70 variables
+#' \describe{
+#' \item{NAME}{Counties names}
+#' \item{STATE_NAME}{State name}
+#' \item{STATE_FIPS}{FIPS code for the state}
+#' \item{CNTY_FIPS}{FIPS code for the county}
+#' \item{FIPS}{state and  county FIPS code}
+#' \item{STFIPS}{FIPS code for the state}
+#' \item{COFIPS}{FIPS code for the county}
+#' \item{FIPSNO}{state + county FIPS code}
+#' \item{SOUTH}{dummy indicator: 1 if the county is in the southern US}
+#' \item{HR60}{homicide rate per 100,000 in 1960}
+#' \item{HR70}{homicide rate per 100,000 in 1970}
+#' \item{HR80}{homicide rate per 100,000 in 1980}
+#' \item{HR90}{homicide rate per 100,000 in 1990}
+#' \item{HC60}{homicide count, three year average centered on 1960}
+#' \item{HC70}{homicide count, three year average centered on 1970}
+#' \item{HC80}{homicide count, three year average centered on 1980}
+#' \item{HC90}{homicide count, three year average centered on 1990}
+#' \item{PO60}{county population in 1960}
+#' \item{PO70}{county population in 1970}
+#' \item{PO80}{county population in 1980}
+#' \item{PO90}{county population in 1990}
+#' \item{RD60}{resource deprivation in 1960}
+#' \item{RD70}{resource deprivation in 1970}
+#' \item{RD80}{resource deprivation in 1980}
+#' \item{RD90}{resource deprivation in 1990}
+#' \item{PS60}{population structure in 1960}
+#' \item{PS70}{population structure in 1970}
+#' \item{PS80}{population structure in 1980}
+#' \item{PS90}{population structure in 1990}
+#' \item{UE60}{unemployment rate in 1960}
+#' \item{UE70}{unemployment rate in 1970}
+#' \item{UE80}{unemployment rate in 1980}
+#' \item{UE90}{unemployment rate in 1990}
+#' \item{DV60}{divorce rate in 1960: pct. males over 14 divorced}
+#' \item{DV70}{divorce rate in 1970: pct. males over 14 divorced}
+#' \item{DV80}{divorce rate in 1980: pct. males over 14 divorced}
+#' \item{DV90}{divorce rate in 1990: pct. males over 14 divorced}
+#' \item{MA60}{median age in 1960}
+#' \item{MA70}{median age in 1970}
+#' \item{MA80}{median age in 1980}
+#' \item{MA90}{median age in 1990}
+#' \item{POL60}{log of population in 1960}
+#' \item{POL70}{log of population in 1970}
+#' \item{POL80}{log of population in 1980}
+#' \item{POL90}{log of population in 1990}
+#' \item{DNL60}{log of population density in 1960}
+#' \item{DNL70}{log of population density in 1970}
+#' \item{DNL80}{log of population density in 1980}
+#' \item{DNL90}{log of population density in 1990}
+#' \item{MFIL59}{log of median family income in 1959}
+#' \item{MFIL69}{log of median family income in 1969}
+#' \item{MFIL79}{log of median family income in 1979}
+#' \item{MFIL89}{log of median family income in 1989}
+#' \item{FP59}{pct. families below poverty in 1959}
+#' \item{FP69}{pct. families below poverty in 1969}
+#' \item{FP79}{pct. families below poverty in 1979}
+#' \item{FP89}{pct. families below poverty in 1989}
+#' \item{BLK60}{pct. black in 1960}
+#' \item{BLK70}{pct. black in 1970}
+#' \item{BLK80}{pct. black in 1980}
+#' \item{BLK90}{pct. black in 1990}
+#' \item{GI59}{Gini index of family income inequality in 1959}
+#' \item{GI69}{Gini index of family income inequality in 1969}
+#' \item{GI79}{Gini index of family income inequality in 1979}
+#' \item{GI89}{Gini index of family income inequality in 1989}
+#' \item{FH60}{pct. female headed households in 1960}
+#' \item{FH70}{pct. female headed households in 1970}
+#' \item{FH80}{pct. female headed households in 1980}
+#' \item{FH90}{pct. female headed households in 1990}
+#' \item{West}{West regional dummy}
+
+#'
+#'
+#' ...
+#' }
+#' @source \url{https://geodacenter.github.io/data-and-lab/}
+"natreg"

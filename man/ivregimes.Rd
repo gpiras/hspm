@@ -28,7 +28,7 @@ ivregimes(formula, data, rgv = NULL, vc = c("classical", "robust", "OGMM"))
 
 \item{rgv}{variable to identify the regimes}
 
-\item{vc}{one of ("classical", "robust", "OGMM")}
+\item{vc}{one of ('classical', 'robust', 'OGMM')}
 
 \item{object}{an object of class ivregime}
 
