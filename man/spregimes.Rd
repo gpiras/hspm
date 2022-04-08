@@ -12,7 +12,7 @@ spregimes(
   rgv = NULL,
   initial.value = 0.2,
   wy_rg = FALSE,
-  model = c("sarar", "lag", "error"),
+  model = c("sarar", "lag", "error", "ols"),
   het = FALSE,
   step1.c = FALSE,
   control = list()
@@ -33,7 +33,7 @@ spregimes(
 
 \item{wy_rg}{default \code{wy_rg = TRUE}, the lagged dependent variable varies for regime}
 
-\item{model}{one of ("sarar", "lag", "error")}
+\item{model}{one of ("sarar", "lag", "error", "ols")}
 
 \item{het}{heteroskedastic variance-covariance matrix}
 

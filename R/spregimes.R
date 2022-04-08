@@ -8,7 +8,7 @@
 #' @param rgv variable to identify the regimes
 #' @param initial.value initial value for the spatial error parameter
 #' @param wy_rg default \code{wy_rg = TRUE}, the lagged dependent variable varies for regime
-#' @param model   one of ("sarar", "lag", "error")
+#' @param model   one of ("sarar", "lag", "error", "ols")
 #' @param het heteroskedastic variance-covariance matrix
 #' @param step1.c use with error and sarar
 #' @param control list of controls for the minimization
@@ -33,7 +33,7 @@
 
 spregimes <- function(formula, data = list(), listw, listw2 = NULL, rgv = NULL,
                       initial.value = 0.2, wy_rg = FALSE,
-                      model = c("sarar", "lag", "error"), het = FALSE,
+                      model = c("sarar", "lag", "error", "ols"), het = FALSE,
                       step1.c = FALSE, control = list()){
 
 
@@ -55,6 +55,8 @@ spregimes <- function(formula, data = list(), listw, listw2 = NULL, rgv = NULL,
          #                instruments = instruments, lag.instr = lag.instr,  verbose = verbose,
          #                na.action = na.action, het = het, HAC = HAC, distance = distance,
          #                type = type, bandwidth = bandwidth, cl = cl, Durbin = Durbin),
+         ols = ols_regimes(formula = formula, data = data, listw = listw, rgv = rgv,
+                           het = het, cl = cl),
          stop("Argument model incorrectly specified")
   )
 
