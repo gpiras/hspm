@@ -605,7 +605,7 @@ spatial.ivreg.regimes <-function(y, Zmat, Hmat, het){
       vardelta <- ZpZpi * as.numeric(s2)
     }
 
-  result <- list(coefficients = delta, var = vardelta)
+  result <- list(coefficients = delta, var = vardelta, residuals = e)
   return(result)
 }
 

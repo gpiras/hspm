@@ -29,18 +29,10 @@ ols_regimes <- function(formula, data, listw, rgv,
   colnames.instr <- intro[[5]]
 
 
-if(length((colnames.end)) != 0 ){
+
   res <- spatial.ivreg.regimes(as.matrix(y), as.matrix(Zmat), as.matrix(Hmat), het)
   res <- list(res, cl, colnames.end,  colnames.instr)
   class(res) <- "ols_regimes"
-  }
-
-else{
-  res <- ols.regimes(as.matrix(y), as.matrix(Zmat), het)
-  res <- list(res, cl, colnames.end,  colnames.instr)
-  class(res) <- "ols_regimes"
-}
-
 
 
   return(res)
@@ -170,6 +162,7 @@ ols.data.prep.regimes <- function(formula, data, rgv, listw){
   rgm              <-  matrix(,nrow = nrow(data), ncol = 0)
   for(i in svm)    rgm <- cbind(rgm, ifelse(splitvar ==  i, 1, 0))
 
+  l.split <- list(n, splitvar, sv, svm, rgm)
   #define w matrix
   if(!inherits(listw,c("listw", "Matrix", "matrix"))) stop("listw format unknown")
   if(inherits(listw,"listw"))  Ws <- listw2dgCMatrix(listw)
@@ -502,71 +495,12 @@ if(!is.null(namesH)){
     stop("Not enough instruments specified: the model is not identified")
 }
   else{
-    Hmat <- matrix(nrow = n, ncol = 0)
+    Hmat <- Zmat
     endog <- NULL
     colinst <-  NULL
   }
   ret <- list(y = y, Hmat = Hmat, Zmat = Zmat, endog = endog,
-              instrum = colinst)
+              instrum = colinst, l.split, Ws)
   return(ret)
 }
 
-
-spatial.ivreg.regimes <-function(y, Zmat, Hmat, het){
-  df <- nrow(Zmat) - ncol(Zmat)
-  HH <- crossprod(Hmat,Hmat)
-  Hye <- crossprod(Hmat, Zmat)
-  bz <- solve(HH,Hye)
-  Zp <- Hmat %*% bz
-  ZpZp <- crossprod(Zp)
-  ZpZpi <- solve(ZpZp)
-  Zpy <- crossprod(Zp,y)
-  delta <- crossprod(ZpZpi,Zpy)
-  yp <- Zmat %*% delta
-  e <- y - yp
-  #	print(dim(e))
-
-  if(het)	{
-
-    s2 <- crossprod(e) /df
-    omega <- as.numeric(e^2)
-    ZoZ <- crossprod(Zp, (Zp * omega))
-    vardelta <- ZpZpi %*% ZoZ %*% ZpZpi
-
-  }
-  else{
-    s2 <- crossprod(e) / df
-    vardelta <- ZpZpi * as.numeric(s2)
-  }
-
-  result <- list(coefficients = delta, var = vardelta)
-  return(result)
-}
-
-ols.regimes <- function(y, Zmat, het){
-  df <- nrow(Zmat) - ncol(Zmat)
-  ZpZ <- crossprod(Zmat)
-  Zpy <- crossprod(Zmat, y)
-  ZpZi <- solve(ZpZ)
-  delta <- ZpZi %*% Zpy
-  yp <- Zmat %*% delta
-  e <- y - yp
-
-   if(het)	{
-
-    s2 <- crossprod(e) /df
-    omega <- as.numeric(e^2)
-    ZoZ <- crossprod(Zmat, (Zmat * omega))
-    vardelta <- ZpZi %*% ZoZ %*% ZpZi
-
-  }
-  else{
-    s2 <- crossprod(e) / df
-    vardelta <- ZpZi * as.numeric(s2)
-  }
-
-
-  result <- list(coefficients = delta, var = vardelta)
-  return(result)
-
-  }

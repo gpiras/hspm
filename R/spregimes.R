@@ -32,7 +32,7 @@
 
 
 spregimes <- function(formula, data = list(), listw, listw2 = NULL, rgv = NULL,
-                      initial.value = 0.2, wy_rg = FALSE,
+                      initial.value = NULL, wy_rg = FALSE, weps_rg = FALSE,
                       model = c("sarar", "lag", "error", "ols"), het = FALSE,
                       step1.c = FALSE, control = list()){
 
@@ -47,14 +47,9 @@ spregimes <- function(formula, data = list(), listw, listw2 = NULL, rgv = NULL,
          #                  step1.c = step1.c, control = control, HAC = HAC, cl = cl, Durbin = Durbin),
          lag = lag_regimes(formula = formula, data = data, listw = listw, rgv = rgv,
                       het = het, cl = cl, wy_rg = wy_rg),
-         # #error = errorgmm(formula = formula, data = data, listw = listw, listw2 = listw2, endog = endog,
-         #                  instruments = instruments, lag.instr = lag.instr, initial.value = initial.value,
-         #                  het = het, verbose = verbose, na.action = na.action,
-         #                  step1.c = step1.c, control = control, HAC = HAC, cl = cl, Durbin = Durbin),
-         # #ivhac = laghac(formula = formula, data = data, listw = listw, listw2 = listw2, endog = endog,
-         #                instruments = instruments, lag.instr = lag.instr,  verbose = verbose,
-         #                na.action = na.action, het = het, HAC = HAC, distance = distance,
-         #                type = type, bandwidth = bandwidth, cl = cl, Durbin = Durbin),
+         error = errorgmm(formula = formula, data = data, listw = listw,  rgv = rgv,
+                          initial.value = initial.value, het = het,
+                          step1.c = step1.c, control = control, cl = cl, weps_rg = weps_rg),
          ols = ols_regimes(formula = formula, data = data, listw = listw, rgv = rgv,
                            het = het, cl = cl),
          stop("Argument model incorrectly specified")
