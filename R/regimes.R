@@ -24,7 +24,7 @@
 #'
 #' @examples
 #' data("baltim")
-#' nbB <- spdep::read.gal(system.file("extdata", "baltimore.gal", package = "spregimes"))
+#' nbB <- spdep::read.gal(system.file("extdata", "baltimore.gal", package = "hspm"))
 #' listw1 <- spdep::nb2listw(nbB, style = "W")
 #' form   <- PRICE  ~ NROOM + NBATH + PATIO + FIREPL + AC + GAR + AGE + LOTSZ + SQFT
 #' split  <- ~ CITCOU

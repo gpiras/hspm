@@ -13,6 +13,7 @@
 #' @param digits number of digits
 
 #'
+
 ols_regimes <- function(formula, data, listw, rgv,
                         het, cl){
 

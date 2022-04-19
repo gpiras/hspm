@@ -29,7 +29,7 @@
 #' #'
 #' #'
 #' #' @author Gianfranco Piras and Mauricio Sarrias
-#' #' @return An object of class ``\code{spregimes}''
+#' #' @return An object of class ``\code{hspm}''
 #' #' @import Formula sphet stats
 #' #' @export
 #'
