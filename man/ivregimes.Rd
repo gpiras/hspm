@@ -39,7 +39,7 @@ ivregimes(formula, data, rgv = NULL, vc = c("classical", "robust", "OGMM"))
 \item{digits}{number of digits}
 }
 \value{
-An object of class ``\code{ivregimes}''
+An object of class \code{ivregimes}
 }
 \description{
 Estimation of spatial regime models

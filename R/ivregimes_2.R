@@ -25,7 +25,7 @@
 #'
 #'
 #' @author Gianfranco Piras and Mauricio Sarrias
-#' @return An object of class ``\code{ivregimes}''
+#' @return An object of class \code{ivregimes}
 #' @import Formula sphet stats
 #' @export
 

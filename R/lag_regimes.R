@@ -188,7 +188,8 @@ iv.lag.data.prep.regimes <- function(formula, data, rgv, listw, wy_rg ){
 ##this lines are creating a wy with no interactions within regimes
   if(wy_rg){
     wy <- Matrix(0, nrow = n, ncol = sv)
-for(i in 1:sv) wy[,i] <- (Ws %*% (as.matrix(y)*rgm[,i]))*rgm[,i]
+# for(i in 1:sv) wy[,i] <- (Ws %*% (as.matrix(y)*rgm[,i]))*rgm[,i]
+    for(i in 1:sv) wy[,i] <- Ws %*% (as.matrix(y)*rgm[,i])
 colnames(wy) <- paste("W_",paste(colnames(y),rep(1:sv), sep = "_"), sep="")
   }
 else{
@@ -264,6 +265,7 @@ if(dim(Xv)[2] != 0){
   }
 
 #head(Xf)
+#head(xfd)
 #head(Wxf)
 
 ### if x varies wx varies
@@ -280,7 +282,8 @@ if(dim(xvd)[2] != 0){
   seq_1 <- seq(1, ncol(xvD), ncol(xvD)/sv)
   seq_2 <- seq(ncol(xvD)/sv, ncol(xvD),  ncol(xvD)/sv)
 
-  for (i in 1: (ncol(xvD)/sv)) WxvD[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (xvD[,seq_1[i]:seq_2[i]]*rgm[,i]))*rgm[,i])
+#  for (i in 1: (ncol(xvD)/sv)) WxvD[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (xvD[,seq_1[i]:seq_2[i]]*rgm[,i]))*rgm[,i])
+  for (i in 1: (ncol(xvD)/sv)) WxvD[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (xvD[,seq_1[i]:seq_2[i]])))
   nameswxv <- paste("W_",colnames(xvD), sep="")
   colnames(WxvD) <- nameswxv
 }
@@ -375,6 +378,7 @@ if(dim(xvd)[2] != 0){
   # add the external instr
   instr.F <- Zf[ , !(colnames(Zf) %in% colnames(Xf)), drop = FALSE]
   instr.V <- Zv[ , !(colnames(Zv) %in% colnames(Xv)), drop = FALSE]
+
   if(dim(instr.V)[2] != 0){
 
     k3 <- dim(instr.V)[2]
@@ -448,7 +452,7 @@ Hx.fne <- cbind(x.ff, Wx.f, WWx.f, WWWx.f,instr.F)
      namesx.vv <- colnames(x.vv)
      namesx.VV <-  paste(namesx.vv, rep(1:sv, each = length(namesx.vv)), sep = "_")
      x.VV <- XV[,which(namesxV %in% namesx.VV), drop = F]
-
+#head(x.VV)
      ###############################################
      namesx.v <- colnames(x.v)
      namesx.V <-  paste(namesx.v, rep(1:sv, each = length(namesx.v)), sep = "_")
@@ -459,12 +463,14 @@ Hx.fne <- cbind(x.ff, Wx.f, WWx.f, WWWx.f,instr.F)
    seq_1 <- seq(1, ncol(x.V), (ncol(x.V)/sv))
    seq_2 <- seq(ncol(x.V)/sv, ncol(x.V),ncol(x.V)/sv  )
 
-   for(i in 1:sv)  Wx.V[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (x.V[,seq_1[i]:seq_2[i]]*rgm[,i]))*rgm[,i])
+   # for(i in 1:sv)  Wx.V[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (x.V[,seq_1[i]:seq_2[i]]*rgm[,i]))*rgm[,i])
+   for(i in 1:sv)  Wx.V[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (x.V[,seq_1[i]:seq_2[i]])))
    nameswx.V <- paste("W_",colnames(x.V), sep="")
    colnames(Wx.V) <- nameswx.V
     #head(Wx.V)
     WWx.V <- matrix(0, ncol = ncol(x.V), nrow = n)
-    for (i in 1: sv) WWx.V[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (Wx.V[,seq_1[i]:seq_2[i]]*rgm[,i]))*rgm[,i])
+    # for (i in 1: sv) WWx.V[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (Wx.V[,seq_1[i]:seq_2[i]]*rgm[,i]))*rgm[,i])
+    for (i in 1: sv) WWx.V[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (Wx.V[,seq_1[i]:seq_2[i]])))
     nameswwx.V <- paste("WW_",colnames(x.V), sep="")
     colnames(WWx.V) <- nameswwx.V
 
@@ -474,7 +480,8 @@ Hx.fne <- cbind(x.ff, Wx.f, WWx.f, WWWx.f,instr.F)
     seq_1 <- seq(1, ncol(WWx.Vfd),ncol(WWx.Vfd)/ sv)
     seq_2 <- seq(ncol(WWx.Vfd)/ sv, ncol(WWx.Vfd),  ncol(WWx.Vfd)/ sv)
     WWWx.V <- matrix(0, ncol = ncol(WWx.Vfd), nrow = n)
-    for (i in 1: (ncol(WWx.Vfd)/sv)) WWWx.V[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (WWx.Vfd[,seq_1[i]:seq_2[i]]*rgm[,i]))*rgm[,i])
+    # for (i in 1: (ncol(WWx.Vfd)/sv)) WWWx.V[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (WWx.Vfd[,seq_1[i]:seq_2[i]]*rgm[,i]))*rgm[,i])
+    for (i in 1: (ncol(WWx.Vfd)/sv)) WWWx.V[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (WWx.Vfd[,seq_1[i]:seq_2[i]])))
     nameswwwx.V <- paste("W",colnames(WWx.Vfd), sep="")
     colnames(WWWx.V) <- nameswwwx.V
      }
@@ -537,7 +544,8 @@ if(dim(whv)[2] != 0){
  seq_1 <- seq(1, ncol(hvD), sv)
  seq_2 <- seq(sv, ncol(hvD),  sv)
 
- for (i in 1: (ncol(hvD)/sv)) WhvD[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (hvD[,seq_1[i]:seq_2[i]]*rgm[,i]))*rgm[,i])
+ # for (i in 1: (ncol(hvD)/sv)) WhvD[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (hvD[,seq_1[i]:seq_2[i]]*rgm[,i]))*rgm[,i])
+ for (i in 1: (ncol(hvD)/sv)) WhvD[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (hvD[,seq_1[i]:seq_2[i]])))
  nameswhv <- paste("W_",colnames(hvD), sep="")
  colnames(WhvD) <- nameswhv
 

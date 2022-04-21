@@ -39,7 +39,7 @@ regimes(formula, data, rgv = NULL, vc = c("homoskedastic", "groupwise"))
 \item{digits}{number of digits}
 }
 \value{
-An object of class ``\code{lm}'', a list with elements:
+An object of class \code{lm} and \code{regimes} a list with elements:
 }
 \description{
 Estimation of spatial regime models
@@ -55,7 +55,7 @@ the  regimes
 }
 \examples{
 data("baltim")
-nbB <- spdep::read.gal(system.file("extdata", "baltimore.gal", package = "spregimes"))
+nbB <- spdep::read.gal(system.file("extdata", "baltimore.gal", package = "hspm"))
 listw1 <- spdep::nb2listw(nbB, style = "W")
 form   <- PRICE  ~ NROOM + NBATH + PATIO + FIREPL + AC + GAR + AGE + LOTSZ + SQFT
 split  <- ~ CITCOU

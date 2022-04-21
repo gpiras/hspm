@@ -10,8 +10,9 @@ spregimes(
   listw,
   listw2 = NULL,
   rgv = NULL,
-  initial.value = 0.2,
+  initial.value = NULL,
   wy_rg = FALSE,
+  weps_rg = FALSE,
   model = c("sarar", "lag", "error", "ols"),
   het = FALSE,
   step1.c = FALSE,
@@ -31,7 +32,9 @@ spregimes(
 
 \item{initial.value}{initial value for the spatial error parameter}
 
-\item{wy_rg}{default \code{wy_rg = TRUE}, the lagged dependent variable varies for regime}
+\item{wy_rg}{default \code{wy_rg = FALSE}, the lagged dependent variable varies for regime}
+
+\item{weps_rg}{default \code{weps_rg = FALSE}, the errors varies for regime}
 
 \item{model}{one of ("sarar", "lag", "error", "ols")}
 

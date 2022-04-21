@@ -258,7 +258,7 @@ ols.data.prep.regimes <- function(formula, data, rgv, listw){
     namesxvD <- paste(namesxvd,rep(1:sv,each = ncol(xvd)), sep = "_")
     xvD  <- XV[, which(namesxV %in% namesxvD), drop = FALSE]
 
-    #head(xvD)
+    #head(xvD, 84)
     #head(XV)
 
     ####take into account that xvD is a matrix
@@ -266,7 +266,8 @@ ols.data.prep.regimes <- function(formula, data, rgv, listw){
     seq_1 <- seq(1, ncol(xvD), ncol(xvD)/sv)
     seq_2 <- seq(ncol(xvD)/sv, ncol(xvD),  ncol(xvD)/sv)
 
-    for (i in 1: (ncol(xvD)/sv)) WxvD[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (xvD[,seq_1[i]:seq_2[i]]*rgm[,i]))*rgm[,i])
+    # for (i in 1: (ncol(xvD)/sv)) WxvD[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (xvD[,seq_1[i]:seq_2[i]]*rgm[,i]))*rgm[,i])
+    for (i in 1: (ncol(xvD)/sv)) WxvD[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% xvD[,seq_1[i]:seq_2[i]]))
     nameswxv <- paste("W_",colnames(xvD), sep="")
     colnames(WxvD) <- nameswxv
   }
@@ -276,7 +277,7 @@ ols.data.prep.regimes <- function(formula, data, rgv, listw){
     WxvD <- matrix(nrow = n, ncol = 0)
   }
   # head(xvD)
-  #  head(WxvD)
+  #  head(WxvD, 84)
 
 
 
@@ -460,7 +461,9 @@ if(!is.null(namesH)){
       seq_1 <- seq(1, ncol(hvD), sv)
       seq_2 <- seq(sv, ncol(hvD),  sv)
 
-      for (i in 1: (ncol(hvD)/sv)) WhvD[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (hvD[,seq_1[i]:seq_2[i]]*rgm[,i]))*rgm[,i])
+      # for (i in 1: (ncol(hvD)/sv)) WhvD[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (hvD[,seq_1[i]:seq_2[i]]*rgm[,i]))*rgm[,i])
+      # for (i in 1: (ncol(hvD)/sv)) WhvD[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (hvD[,seq_1[i]:seq_2[i]]*rgm[,i])))
+      for (i in 1: (ncol(hvD)/sv)) WhvD[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (hvD[,seq_1[i]:seq_2[i]])))
       nameswhv <- paste("W_",colnames(hvD), sep="")
       colnames(WhvD) <- nameswhv
 

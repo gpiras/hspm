@@ -36,7 +36,7 @@
 #'
 #'
 #' @author Gianfranco Piras and Mauricio Sarrias
-#' @return An object of class ``\code{lm}'', a list with elements:
+#' @return An object of class \code{lm} and \code{regimes} a list with elements:
 #' @import Formula sphet stats spdep
 #' @export
 
