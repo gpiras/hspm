@@ -11,9 +11,8 @@
 #' @param weps_rg default \code{weps_rg = FALSE}, the errors varies for regime
 #' @param model   one of ("sarar", "lag", "error", "ols")
 #' @param het heteroskedastic variance-covariance matrix
-#' @param step1.c use with error and sarar
 #' @param control list of controls for the minimization
-#'
+#' @param verbose print a trace of the optimization
 #'
 #' @details
 #'
@@ -34,9 +33,9 @@
 
 
 spregimes <- function(formula, data = list(), listw, listw2 = NULL, rgv = NULL,
-                      initial.value = NULL, wy_rg = FALSE, weps_rg = FALSE,
+                      initial.value = NULL, verbose = FALSE, wy_rg = FALSE, weps_rg = FALSE,
                       model = c("sarar", "lag", "error", "ols"), het = FALSE,
-                      step1.c = FALSE, control = list()){
+                      control = list()){
 
 
 
@@ -49,9 +48,9 @@ spregimes <- function(formula, data = list(), listw, listw2 = NULL, rgv = NULL,
          #                  step1.c = step1.c, control = control, HAC = HAC, cl = cl, Durbin = Durbin),
          lag = lag_regimes(formula = formula, data = data, listw = listw, rgv = rgv,
                       het = het, cl = cl, wy_rg = wy_rg),
-         # error = errorgmm(formula = formula, data = data, listw = listw,  rgv = rgv,
-         #                  initial.value = initial.value, het = het,
-         #                  step1.c = step1.c, control = control, cl = cl, weps_rg = weps_rg),
+          error = error_regimes(formula = formula, data = data, listw = listw,  rgv = rgv,
+                           initial.value = initial.value, het = het,
+                           control = control, cl = cl, weps_rg = weps_rg, verbose = verbose),
          ols = ols_regimes(formula = formula, data = data, listw = listw, rgv = rgv,
                            het = het, cl = cl),
          stop("Argument model incorrectly specified")

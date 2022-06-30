@@ -34,7 +34,7 @@ lag_regimes(formula, data, listw, rgv, het, cl, wy_rg)
 
 \item{cl}{record calls}
 
-\item{wy_rg}{default \code{wy_rg = TRUE}, the lagged dependent variable varies for regime}
+\item{wy_rg}{default \code{wy_rg = TRUE}, the lagged dependent variable varies by regime}
 
 \item{object}{an object of class lag_regime}
 

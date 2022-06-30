@@ -5,7 +5,7 @@
 #' @param data the data of class \code{data.frame}.
 #' @param listw a spatial weighting matrix
 #' @param rgv variable to identify the regimes
-#' @param wy_rg default \code{wy_rg = TRUE}, the lagged dependent variable varies for regime
+#' @param wy_rg default \code{wy_rg = TRUE}, the lagged dependent variable varies by regime
 #' @param het heteroskedastic variance-covariance matrix
 #' @param cl record calls
 #' @param object an object of class lag_regime
@@ -283,7 +283,8 @@ if(dim(xvd)[2] != 0){
   seq_2 <- seq(ncol(xvD)/sv, ncol(xvD),  ncol(xvD)/sv)
 
 #  for (i in 1: (ncol(xvD)/sv)) WxvD[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (xvD[,seq_1[i]:seq_2[i]]*rgm[,i]))*rgm[,i])
-  for (i in 1: (ncol(xvD)/sv)) WxvD[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (xvD[,seq_1[i]:seq_2[i]])))
+ # for (i in 1: (ncol(xvD)/sv)) WxvD[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (xvD[,seq_1[i]:seq_2[i]])))
+  for (i in 1: sv) WxvD[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (xvD[,seq_1[i]:seq_2[i]])))
   nameswxv <- paste("W_",colnames(xvD), sep="")
   colnames(WxvD) <- nameswxv
 }
@@ -481,7 +482,8 @@ Hx.fne <- cbind(x.ff, Wx.f, WWx.f, WWWx.f,instr.F)
     seq_2 <- seq(ncol(WWx.Vfd)/ sv, ncol(WWx.Vfd),  ncol(WWx.Vfd)/ sv)
     WWWx.V <- matrix(0, ncol = ncol(WWx.Vfd), nrow = n)
     # for (i in 1: (ncol(WWx.Vfd)/sv)) WWWx.V[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (WWx.Vfd[,seq_1[i]:seq_2[i]]*rgm[,i]))*rgm[,i])
-    for (i in 1: (ncol(WWx.Vfd)/sv)) WWWx.V[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (WWx.Vfd[,seq_1[i]:seq_2[i]])))
+    #for (i in 1: (ncol(WWx.Vfd)/sv)) WWWx.V[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (WWx.Vfd[,seq_1[i]:seq_2[i]])))
+    for (i in 1:sv) WWWx.V[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (WWx.Vfd[,seq_1[i]:seq_2[i]])))
     nameswwwx.V <- paste("W",colnames(WWx.Vfd), sep="")
     colnames(WWWx.V) <- nameswwwx.V
      }
@@ -545,7 +547,8 @@ if(dim(whv)[2] != 0){
  seq_2 <- seq(sv, ncol(hvD),  sv)
 
  # for (i in 1: (ncol(hvD)/sv)) WhvD[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (hvD[,seq_1[i]:seq_2[i]]*rgm[,i]))*rgm[,i])
- for (i in 1: (ncol(hvD)/sv)) WhvD[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (hvD[,seq_1[i]:seq_2[i]])))
+ #for (i in 1: (ncol(hvD)/sv)) WhvD[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (hvD[,seq_1[i]:seq_2[i]])))
+ for (i in 1: sv) WhvD[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (hvD[,seq_1[i]:seq_2[i]])))
  nameswhv <- paste("W_",colnames(hvD), sep="")
  colnames(WhvD) <- nameswhv
 

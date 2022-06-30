@@ -11,11 +11,11 @@ spregimes(
   listw2 = NULL,
   rgv = NULL,
   initial.value = NULL,
+  verbose = FALSE,
   wy_rg = FALSE,
   weps_rg = FALSE,
   model = c("sarar", "lag", "error", "ols"),
   het = FALSE,
-  step1.c = FALSE,
   control = list()
 )
 }
@@ -32,6 +32,8 @@ spregimes(
 
 \item{initial.value}{initial value for the spatial error parameter}
 
+\item{verbose}{print a trace of the optimization}
+
 \item{wy_rg}{default \code{wy_rg = FALSE}, the lagged dependent variable varies for regime}
 
 \item{weps_rg}{default \code{weps_rg = FALSE}, the errors varies for regime}
@@ -39,8 +41,6 @@ spregimes(
 \item{model}{one of ("sarar", "lag", "error", "ols")}
 
 \item{het}{heteroskedastic variance-covariance matrix}
-
-\item{step1.c}{use with error and sarar}
 
 \item{control}{list of controls for the minimization}
 }

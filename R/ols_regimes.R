@@ -20,7 +20,8 @@ ols_regimes <- function(formula, data, listw, rgv,
 
 
 
-  intro <- ols.data.prep.regimes(formula, data = data, listw = listw, rgv = rgv)
+  intro <- ols.data.prep.regimes(formula, data = data, listw = listw, rgv = rgv,
+                                 weps_rg = FALSE, model = "ols")
 
 
   y        <- intro[[1]]
@@ -148,7 +149,8 @@ print.summary.ols_regimes <- function(x,
 
 
 
-ols.data.prep.regimes <- function(formula, data, rgv, listw){
+ols.data.prep.regimes <- function(formula, data, rgv, listw,
+                                  weps_rg, model){
 
   #rm(list=ls())
 
@@ -178,6 +180,12 @@ ols.data.prep.regimes <- function(formula, data, rgv, listw){
   parts <- length(F1)
 
   if(parts[2] != 6) stop("Formula should have six parts")
+ # print(weps_rg)
+  #print(attributes(F1)$rhs[[1]]!=0)
+  #print(weps_rg  && attributes(F1)$rhs[[1]]!=0)
+
+  if(weps_rg && attributes(F1)$rhs[[1]]!=0) stop("If the spatial process vary by
+                                                                      regimes, all of the regressors should vary by regimes")
 
   mf <- model.frame(F1, data = data)
   y <- model.part(F1, data = mf, lhs = 1, drop = FALSE)
@@ -213,8 +221,8 @@ ols.data.prep.regimes <- function(formula, data, rgv, listw){
     namesxV <- paste(namesxv,rep(1:sv,each = k2), sep = "_")
     colnames(XV) <- namesxV
   }
-  # head(Xf)
-  #head(XV)
+   #print(head(Xf))
+  #print(head(XV))
   #head(rgm)
 
   ###############################
@@ -228,7 +236,7 @@ ols.data.prep.regimes <- function(formula, data, rgv, listw){
 
   if(any(colnames(wx) == "(Intercept)")) wx <- wx[,-which(colnames(wx) == "(Intercept)")]
   nameswx <-  colnames(wx)
-  # head(wx)
+   #print(head(wx))
 
   #check if Durbin are fixed or variable
   xfd  <- wx[,(nameswx %in% namesxf), drop = FALSE]
@@ -236,8 +244,8 @@ ols.data.prep.regimes <- function(formula, data, rgv, listw){
   namesxfd <- colnames(xfd)
   namesxvd <- colnames(xvd)
 
-  #head(xfd)
-  #head(xvd)
+  #print(head(xfd))
+  #print(head(xvd))
 
   ### if x is fixed wx is fixed
   if(dim(xfd)[2] !=0){
@@ -249,8 +257,8 @@ ols.data.prep.regimes <- function(formula, data, rgv, listw){
     colnames(Wxf) <- NULL
   }
 
-  #head(Xf)
-  #head(Wxf)
+  #print(head(Xf))
+  #print(head(Wxf))
 
   ### if x varies wx varies
   if(dim(xvd)[2] != 0){
@@ -258,16 +266,20 @@ ols.data.prep.regimes <- function(formula, data, rgv, listw){
     namesxvD <- paste(namesxvd,rep(1:sv,each = ncol(xvd)), sep = "_")
     xvD  <- XV[, which(namesxV %in% namesxvD), drop = FALSE]
 
-    #head(xvD, 84)
+   # print(head(xvD))
     #head(XV)
 
     ####take into account that xvD is a matrix
     WxvD <- matrix(0, ncol = ncol(xvD), nrow = n)
     seq_1 <- seq(1, ncol(xvD), ncol(xvD)/sv)
     seq_2 <- seq(ncol(xvD)/sv, ncol(xvD),  ncol(xvD)/sv)
-
-    # for (i in 1: (ncol(xvD)/sv)) WxvD[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (xvD[,seq_1[i]:seq_2[i]]*rgm[,i]))*rgm[,i])
-    for (i in 1: (ncol(xvD)/sv)) WxvD[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% xvD[,seq_1[i]:seq_2[i]]))
+#print(seq_1)
+#print(seq_2)
+#print(dim(WxvD))
+#print(as.matrix(Ws) %*% xvD[,seq_1[i]:seq_2[i]])
+#print((ncol(xvD)/sv))
+    # for (i in 1: (ncol(xvD)/sv)) WxvD[,seq_1[i]:seq_2[i]] <-  as.matrix(Ws %*% (xvD[,seq_1[i]:seq_2[i]]*rgm[,i]))*rgm[,i])
+    for (i in 1: sv) WxvD[,seq_1[i]:seq_2[i]] <-  as.matrix(Ws) %*% xvD[,seq_1[i]:seq_2[i]]
     nameswxv <- paste("W_",colnames(xvD), sep="")
     colnames(WxvD) <- nameswxv
   }
@@ -276,13 +288,13 @@ ols.data.prep.regimes <- function(formula, data, rgv, listw){
     xvD <- matrix(nrow = n, ncol = 0)
     WxvD <- matrix(nrow = n, ncol = 0)
   }
-  # head(xvD)
-  #  head(WxvD, 84)
+ #  print(head(xvD))
+#   print(head(WxvD))
 
 
 
   Zmat <- cbind(Xf, XV, Wxf, WxvD)
-  #head(Zmat)
+ # print(head(Zmat))
   #head(rgm)
 
 
@@ -460,10 +472,12 @@ if(!is.null(namesH)){
       WhvD <- matrix(0, ncol = ncol(hvD), nrow = n)
       seq_1 <- seq(1, ncol(hvD), sv)
       seq_2 <- seq(sv, ncol(hvD),  sv)
-
+#print(seq_1)
+#print(seq_2)
       # for (i in 1: (ncol(hvD)/sv)) WhvD[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (hvD[,seq_1[i]:seq_2[i]]*rgm[,i]))*rgm[,i])
       # for (i in 1: (ncol(hvD)/sv)) WhvD[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (hvD[,seq_1[i]:seq_2[i]]*rgm[,i])))
-      for (i in 1: (ncol(hvD)/sv)) WhvD[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (hvD[,seq_1[i]:seq_2[i]])))
+      #for (i in 1: (ncol(hvD)/sv)) WhvD[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (hvD[,seq_1[i]:seq_2[i]])))
+      for (i in 1: (ncol(hvD)/sv)) WhvD[,seq_1[i]:seq_2[i]] <-  as.matrix(Ws) %*% hvD[,seq_1[i]:seq_2[i]]
       nameswhv <- paste("W_",colnames(hvD), sep="")
       colnames(WhvD) <- nameswhv
 
@@ -484,7 +498,7 @@ if(!is.null(namesH)){
   Hmat <- cbind(Hx.fne, Hx.vne, winsf, WhvD)
   #head(Hmat)
   Hmat <- Hmat[, qr(Hmat)$pivot[seq_len(qr(Hmat)$rank)]]
-  head(Hmat)
+  #head(Hmat)
 
   ## if instruments check identification
 
@@ -504,7 +518,7 @@ if(!is.null(namesH)){
     colinst <-  NULL
   }
   ret <- list(y = y, Hmat = Hmat, Zmat = Zmat, endog = endog,
-              instrum = colinst, l.split, Ws)
+              instrum = colinst, l.split = l.split, Ws = Ws)
   return(ret)
 }
 
