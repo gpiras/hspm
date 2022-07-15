@@ -1,19 +1,19 @@
-##### Functions for linear model with lagged explanatory variables####
+##### Functions for linear model with error dependence and regimes####
 #' Estimation of spatial regime models
 #' @name error_regimes
-#' @param formula a symbolic description of the model.
+#' @param formula a symbolic description of the model of the form \code{y ~ x_f | x_v | wx | h_f | h_v | wh} where \code{y} is the dependent variable, \code{x_f} are the regressors that do not vary by regimes,  \code{x_v} are the regressors that vary by regimes, \code{wx} are the spatially lagged regressors, \code{h_f} are the instruments that do not vary by regimes,  \code{h_v} are the instruments that vary by regimes, \code{wh} are the spatially lagged instruments.
 #' @param data the data of class \code{data.frame}.
-#' @param listw a spatial weighting matrix
-#' @param weps_rg default FALSE, if TRUE the spatial error term varies by regimes (see details)
-#' @param initial.value starting point for the optimization
-#' @param rgv variable to identify the regimes
+#' @param listw a spatial weighting matrix of class \code{listw}, \code{matrix} or \code{Matrix}
+#' @param weps_rg default \code{weps_rg = FALSE}, the errors do not vary by regime (see details)
+#' @param initial.value initial value for the spatial error parameter
+#' @param rgv an object of class \code{formula} to identify the regime variables
 #' @param het heteroskedastic variance-covariance matrix
 #' @param cl record calls
 #' @param verbose print a trace of the optimization
 #' @param control argument for optimization
-#' @param object an object of class lag_regime
+#' @param object an object of class error_regimes
 #' @param ... additional arguments
-#' @param x an object of class lag_regime
+#' @param x an object of class error_regimes
 #' @param digits number of digits
 #'
 #'
@@ -49,24 +49,24 @@ rhotilde <- error_part_regime(pars = pars, l.split = l.split,
                               Ws = Ws, het = het,
                               ubase = ubase, n = n, weps_rg = weps_rg,
                               verbose = verbose, control = control)
-
-out <- co.transform(rhotilde = rhotilde, y = y,
+#print(rhotilde)
+out <- co_transform(rhotilde = rhotilde, y = y,
                     Zmat = Zmat, Hmat = Hmat,
                     l.split = l.split, Ws = Ws, het = het)
 
 delta <- out[[1]]
 utildeb <- out[[2]]
-k <- out[[3]]
-#print(delta)
-res <- error_efficient_regime(Ws = Ws, utildeb = utildeb,
-                              n = n, weps_rg = weps_rg,
-                              l.split = l.split,
-                              rhotilde = rhotilde,
-                              Hmat = Hmat, Zmat = Zmat,
-                              control = control, het = het,
-                              verbose = verbose, delta = delta)
 
-res <- list(res, cl, colnames.end,  colnames.instr)
+#print(delta)
+#print(utildeb)
+pippo <- error_efficient_regime(Ws = Ws, utildeb = utildeb,
+                                n = n, weps_rg = weps_rg,
+                                l.split = l.split, rhotilde = rhotilde,
+                                Hmat = Hmat, Zmat = Zmat,
+                                control = control, het = het,
+                                verbose = verbose, delta = delta)
+
+res <- list(pippo, cl, colnames.end,  colnames.instr)
 #print(res)
 class(res) <- "error_regimes"
 return(res)
@@ -228,7 +228,11 @@ error_part_regime <- function(pars, l.split, Ws, het, ubase, n, weps_rg, verbose
 rhotilde
 }
 
-co.transform <- function(rhotilde, y, Zmat, Hmat, l.split, Ws, het){
+co_transform <- function(rhotilde, y, Zmat, Hmat, l.split, Ws, het){
+
+  sv <- l.split[[3]]
+  rgm <- l.split[[5]]
+
   if(length(rhotilde) == 1L){
     yt  <- y - rhotilde * Ws %*% y
     wZmat <- Ws %*% Zmat
@@ -237,33 +241,29 @@ co.transform <- function(rhotilde, y, Zmat, Hmat, l.split, Ws, het){
     secondstep <- spatial.ivreg.regimes(y = yt , Zmat = Zt, Hmat = Hmat, het = het)
     delta <- coefficients(secondstep)
     utildeb <- y - Zmat %*% delta
+
   }
   else{
-    sv <- l.split[[3]]
-    rgm <- l.split[[5]]
     yt  <- matrix(0, nrow = l.split[[1]], ncol = 1 )
     for(i in 1:sv) yt[which(rgm[,i] == 1)]  <- ((y*rgm[,i]) - rhotilde[i] * Ws %*% (y*rgm[,i]))[which(rgm[,i] ==1)]
     #this multiplies each colums of zmat for the corresponding rho
     Zt    <- matrix(0, ncol = ncol(Zmat), nrow = nrow(Zmat))
-    for(i in 1: sv) Zt[,grep(paste("_", i, sep=""), colnames(Zmat))]   <- Zmat[,grep(paste("_", i, sep=""), colnames(Zmat))] - rhotilde[i] * as.matrix(Ws %*% Zmat[,grep(paste("_", i, sep=""), colnames(Zmat))])
+    for(i in 1: sv) Zt[,grep(paste("_", i, sep=""), colnames(Zmat))]   <- as.matrix(Zmat[,grep(paste("_", i, sep=""), colnames(Zmat))]) - rhotilde[i] * as.matrix(Ws %*% Zmat[,grep(paste("_", i, sep=""), colnames(Zmat))])
     colnames(Zt) <- colnames(Zmat)
 
     secondstep <- spatial.ivreg.regimes(y = yt , Zmat = Zt, Hmat = Hmat, het = het)
     delta <- coefficients(secondstep)
     utildeb <- y - Zmat %*% delta
-    k <- length(delta)/sv
+
   }
   rownames(delta) <- colnames(Zmat)
 
-  out <- list(delta = delta, utildeb = utildeb, k = k)
-  return(out)
+  res <- list(delta = delta, utildeb = utildeb)
+  return(res)
 }
 
+error_efficient_regime <- function(Ws, utildeb, n, weps_rg, l.split, rhotilde, Hmat, Zmat, control, het, verbose, delta){
 
-error_efficient_regime <- function(Ws, utildeb, n, weps_rg, l.split,
-                                   rhotilde, Hmat,
-                                   Zmat, control, het,
-                                   verbose, delta){
   if(het){
 
 
@@ -316,7 +316,7 @@ error_efficient_regime <- function(Ws, utildeb, n, weps_rg, l.split,
                      weps_rg = weps_rg)
 
     rhofin <- optres$par
-    #print(utildeb)
+    #print(rhofin)
     gmm.weghts <-psirhorho_hom_regime(rho = rhofin, residuals = utildeb,
                                       Hmat = Hmat, Zmat = Zmat, Ws = Ws,
                                       d = Ggmat$d, v.vec = Ggmat$v.vec,
@@ -350,10 +350,11 @@ error_efficient_regime <- function(Ws, utildeb, n, weps_rg, l.split,
 
   }
   else{
-    deltarho <- c(delta, rhofin)
+    deltarho <- c(as.numeric(delta), rhofin)
     names(deltarho) <- c(rownames(delta), "We")
   }
-  result <- list(coefficients = deltarho, var = vcmat, residuals = utildeb)
 
-  return(result)
+   paps <- list(coefficients = deltarho, var = vcmat, residuals = utildeb)
+
+  return(paps)
 }

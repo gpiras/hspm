@@ -22,23 +22,23 @@ ols_regimes(formula, data, listw, rgv, het, cl)
 \method{print}{summary.ols_regimes}(x, digits = max(5, getOption("digits") - 3), ...)
 }
 \arguments{
-\item{formula}{a symbolic description of the model.}
+\item{formula}{a symbolic description of the model of the form \code{y ~ x_f | x_v | wx | h_f | h_v | wh} where \code{y} is the dependent variable, \code{x_f} are the regressors that do not vary by regimes,  \code{x_v} are the regressors that vary by regimes, \code{wx} are the spatially lagged regressors, \code{h_f} are the instruments that do not vary by regimes,  \code{h_v} are the instruments that vary by regimes, \code{wh} are the spatially lagged instruments.}
 
 \item{data}{the data of class \code{data.frame}.}
 
-\item{listw}{a spatial weighting matrix}
+\item{listw}{a spatial weighting matrix of class \code{listw}, \code{matrix} or \code{Matrix}}
 
-\item{rgv}{variable to identify the regimes}
+\item{rgv}{an object of class \code{formula} to identify the regime variables}
 
 \item{het}{heteroskedastic variance-covariance matrix}
 
 \item{cl}{record calls}
 
-\item{object}{an object of class lag_regime}
+\item{object}{an object of class ols_regimes}
 
 \item{...}{additional arguments}
 
-\item{x}{an object of class lag_regime}
+\item{x}{an object of class ols_regimes}
 
 \item{digits}{number of digits}
 }

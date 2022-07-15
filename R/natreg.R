@@ -4,6 +4,9 @@
 #'
 #' @format A data frame with 3085 rows and 70 variables
 #' \describe{
+#' \item{REGIONS}{Regions of the US}
+#' \item{NOSOUTH}{Counties not in the south}
+#' \item{POLY_ID}{Poligon id}
 #' \item{NAME}{Counties names}
 #' \item{STATE_NAME}{State name}
 #' \item{STATE_FIPS}{FIPS code for the state}

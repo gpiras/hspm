@@ -1,12 +1,12 @@
 
 
 ##### Functions for regimes ####
-#' Estimation of spatial regime models
+#' @title Estimation of spatial regime models
 #' @name ivregimes
-#' @param formula a symbolic description of the model.
+#' @param formula a symbolic description of the model of the form \code{y ~ x_f | x_v | h_f | h_v} where \code{y} is the dependent variable, \code{x_f} are the regressors that do not vary by regimes,  \code{x_v} are the regressors that vary by regimes, \code{h_f} are the fixed instruments and \code{h_v} are the instruments that vary by regimes.
 #' @param data the data of class \code{data.frame}.
-#' @param rgv variable to identify the regimes
-#' @param vc   one of ('classical', 'robust', 'OGMM')
+#' @param rgv an object of class \code{formula} to identify the regime variables
+#' @param vc   one of \code{c('classical', 'robust', 'OGMM')}. If \code{OGMM} an optimal weighted GMM is used to estimate the VC matrix (for additional details see Anselin and Rey, 2014).
 #' @param object an object of class ivregime
 #' @param ... additional arguments
 #' @param x an object of class ivregime
@@ -22,7 +22,14 @@
 #' }
 #' for i=1,..,n representing the sample observations, and j =1,..., J representing
 #' the  regimes
-#'
+
+#' @examples
+#' data("natreg")
+#' form   <- HR90  ~ 0 | MA90 + PS90 + RD90 + UE90 | 0 | MA90 + PS90 + RD90 + FH90 + FP89 + GI89
+#' split  <- ~ REGIONS
+#' mod <- ivregimes(formula = form, data = natreg, rgv = split, vc = "robust")
+#' summary(mod)
+
 #'
 #' @author Gianfranco Piras and Mauricio Sarrias
 #' @return An object of class \code{ivregimes}

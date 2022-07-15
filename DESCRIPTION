@@ -2,13 +2,13 @@ Package: hspm
 Type: Package
 Title: Spatial Regime Models
 Version: 0.1.0
-Author: c(person("Mauricio", "Sarrias", role = c("aut"), 
-                    email = "msarrias86@gmail.com", 
-                    comment = c(ORCID = "0000-0001-5932-4817")), 
-             person("Gianfranco", "Piras", role = c("aut", "cre"), 
+Authors@R: c(person("Gianfranco", "Piras", role = c("aut", "cre"), 
                     email = "gpiras@mac.com", 
-                    comment = c(ORCID = "0000-0003-0225-6061")))
-Maintainer: <gpiras@mac.com>
+                    comment = c(ORCID = "0000-0003-0225-6061")),
+                    person("Mauricio", "Sarrias", role = c("aut"), 
+                    email = "msarrias86@gmail.com", 
+                    comment = c(ORCID = "0000-0001-5932-4817")))
+Maintainer: Gianfranco Piras <gpiras@mac.com>
 Description: The current version implements the spatial regime models.
 Encoding: UTF-8
 LazyData: true

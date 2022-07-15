@@ -8,7 +8,6 @@ spregimes(
   formula,
   data = list(),
   listw,
-  listw2 = NULL,
   rgv = NULL,
   initial.value = NULL,
   verbose = FALSE,
@@ -20,25 +19,23 @@ spregimes(
 )
 }
 \arguments{
-\item{formula}{a symbolic description of the model.}
+\item{formula}{a symbolic description of the model of the form \code{y ~ x_f | x_v | wx | h_f | h_v | wh} where \code{y} is the dependent variable, \code{x_f} are the regressors that do not vary by regimes,  \code{x_v} are the regressors that vary by regimes, \code{wx} are the spatially lagged regressors, \code{h_f} are the instruments that do not vary by regimes,  \code{h_v} are the instruments that vary by regimes, \code{wh} are the spatially lagged instruments.}
 
 \item{data}{the data of class \code{data.frame}.}
 
-\item{listw}{a spatial weighting matrix}
+\item{listw}{a spatial weighting matrix of class \code{listw}, \code{matrix} or \code{Matrix}}
 
-\item{listw2}{an (optional) spatial weighting matrix for sarar models}
-
-\item{rgv}{variable to identify the regimes}
+\item{rgv}{an object of class \code{formula} to identify the regime variables}
 
 \item{initial.value}{initial value for the spatial error parameter}
 
 \item{verbose}{print a trace of the optimization}
 
-\item{wy_rg}{default \code{wy_rg = FALSE}, the lagged dependent variable varies for regime}
+\item{wy_rg}{default \code{wy_rg = FALSE}, the lagged dependent variable does not vary by regime (see details)}
 
-\item{weps_rg}{default \code{weps_rg = FALSE}, the errors varies for regime}
+\item{weps_rg}{default \code{weps_rg = FALSE}, the errors do not vary by regime (see details)}
 
-\item{model}{one of ("sarar", "lag", "error", "ols")}
+\item{model}{one of \code{model = c("sarar", "lag", "error", "ols")}}
 
 \item{het}{heteroskedastic variance-covariance matrix}
 
@@ -51,13 +48,23 @@ An object of class ``\code{lag_regimes}'', or \code{sarar_regimes}, or \code{err
 Estimation of spatial regime models
 }
 \details{
-The model estimated is:
-
-\deqn{
-y_{ij}= \mathbf{x_{ij,k}}\beta_j + \mathbf{Y_{ij,k}}\gamma_j + \epsilon
+The general model contains the spatial lag of the dependent variable, the spatial lag of the regressors, the spatial lag of the errors and possibly additional endogenous variables.
+\code{spregimes} estimate all of the nested specifications of this general model.
+The regressors can be either "fixed" or varying by regime. However, if \code{weps_rg} is set to TRUE, all the regressors should vary by regime.
 }
-for i=1,..,n representing the sample observations, and j =1,..., J representing
-the  regimes
+\examples{
+data("natreg")
+data("ws_6")
+form   <- HR90  ~ 0 | MA90 + PS90 + RD90 + UE90 | 0 | 0 | MA90 + PS90 + RD90 + FH90 + FP89 + GI89 | 0
+split  <- ~ REGIONS
+mod <- spregimes(formula = form, data = natreg, rgv = split, listw = ws_6, model = "error", het = TRUE)
+summary(mod)
+mod <- spregimes(formula = form, data = natreg, rgv = split, listw = ws_6, model = "lag", het = TRUE, wy_rg = TRUE)
+summary(mod)
+mod <- spregimes(formula = form, data = natreg, rgv = split, listw = ws_6, model = "sarar", het = TRUE, wy_rg = TRUE, weps_rg = TRUE)
+summary(mod)
+
+
 }
 \author{
 Gianfranco Piras and Mauricio Sarrias
