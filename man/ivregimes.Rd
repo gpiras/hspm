@@ -22,13 +22,13 @@ ivregimes(formula, data, rgv = NULL, vc = c("classical", "robust", "OGMM"))
 \method{print}{summary.ivregimes}(x, digits = max(5, getOption("digits") - 3), ...)
 }
 \arguments{
-\item{formula}{a symbolic description of the model.}
+\item{formula}{a symbolic description of the model of the form \code{y ~ x_f | x_v | h_f | h_v} where \code{y} is the dependent variable, \code{x_f} are the regressors that do not vary by regimes,  \code{x_v} are the regressors that vary by regimes, \code{h_f} are the fixed instruments and \code{h_v} are the instruments that vary by regimes.}
 
 \item{data}{the data of class \code{data.frame}.}
 
-\item{rgv}{variable to identify the regimes}
+\item{rgv}{an object of class \code{formula} to identify the regime variables}
 
-\item{vc}{one of ('classical', 'robust', 'OGMM')}
+\item{vc}{one of \code{c('classical', 'robust', 'OGMM')}. If \code{OGMM} an optimal weighted GMM is used to estimate the VC matrix (for additional details see Anselin and Rey, 2014).}
 
 \item{object}{an object of class ivregime}
 
@@ -52,6 +52,14 @@ y_{ij}= \mathbf{x_{ij,k}}\beta_j + \mathbf{Y_{ij,k}}\gamma_j + \epsilon
 }
 for i=1,..,n representing the sample observations, and j =1,..., J representing
 the  regimes
+}
+\examples{
+data("natreg")
+form   <- HR90  ~ 0 | MA90 + PS90 + RD90 + UE90 | 0 | MA90 + PS90 + RD90 + FH90 + FP89 + GI89
+split  <- ~ REGIONS
+mod <- ivregimes(formula = form, data = natreg, rgv = split, vc = "robust")
+summary(mod)
+
 }
 \author{
 Gianfranco Piras and Mauricio Sarrias

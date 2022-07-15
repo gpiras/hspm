@@ -1,15 +1,15 @@
 ##### Functions for linear model with lagged explanatory variables####
 #' Estimation of spatial regime models
 #' @name ols_regimes
-#' @param formula a symbolic description of the model.
+#' @param formula a symbolic description of the model of the form \code{y ~ x_f | x_v | wx | h_f | h_v | wh} where \code{y} is the dependent variable, \code{x_f} are the regressors that do not vary by regimes,  \code{x_v} are the regressors that vary by regimes, \code{wx} are the spatially lagged regressors, \code{h_f} are the instruments that do not vary by regimes,  \code{h_v} are the instruments that vary by regimes, \code{wh} are the spatially lagged instruments.
 #' @param data the data of class \code{data.frame}.
-#' @param listw a spatial weighting matrix
-#' @param rgv variable to identify the regimes
+#' @param listw a spatial weighting matrix of class \code{listw}, \code{matrix} or \code{Matrix}
+#' @param rgv an object of class \code{formula} to identify the regime variables
 #' @param het heteroskedastic variance-covariance matrix
 #' @param cl record calls
-#' @param object an object of class lag_regime
+#' @param object an object of class ols_regimes
 #' @param ... additional arguments
-#' @param x an object of class lag_regime
+#' @param x an object of class ols_regimes
 #' @param digits number of digits
 
 #'

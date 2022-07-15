@@ -2,15 +2,15 @@
 
 
 ##### Functions for regimes ####
-#' Estimation of spatial regime models
+#' @title Estimation of spatial regime models
 #' @name regimes
-#' @param formula a symbolic description of the model.
+#' @param formula a symbolic description of the model of the form \code{y ~ x_f | x_v} where \code{y} is the dependent variable, \code{x_f} are the regressors that do not vary by regimes and  \code{x_v} are the regressors that vary by regimes
 #' @param data the data of class \code{data.frame}.
-#' @param rgv variable to identify the regimes
-#' @param vc   one of ("homoskedastic", "groupwise")
-#' @param object an object of class ivregime
+#' @param rgv an object of class \code{formula} to identify the regime variables
+#' @param vc   one of \code{c("homoskedastic", "groupwise")}. If \code{groupwise}, a the model VC matrix is estimated by weighted least square.
+#' @param object an object of class regime
 #' @param ... additional arguments
-#' @param x an object of class ivregime
+#' @param x an object of class regimes
 #' @param digits number of digits
 #' @details
 #'
@@ -24,8 +24,6 @@
 #'
 #' @examples
 #' data("baltim")
-#' nbB <- spdep::read.gal(system.file("extdata", "baltimore.gal", package = "hspm"))
-#' listw1 <- spdep::nb2listw(nbB, style = "W")
 #' form   <- PRICE  ~ NROOM + NBATH + PATIO + FIREPL + AC + GAR + AGE + LOTSZ + SQFT
 #' split  <- ~ CITCOU
 #' mod <- regimes(formula = form, data = baltim, rgv = split, vc = "groupwise")

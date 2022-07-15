@@ -1,11 +1,11 @@
 ##### Functions for spatial lag regimes model####
 #' Estimation of spatial regime models
 #' @name lag_regimes
-#' @param formula a symbolic description of the model.
+#' @param formula a symbolic description of the model of the form \code{y ~ x_f | x_v | wx | h_f | h_v | wh} where \code{y} is the dependent variable, \code{x_f} are the regressors that do not vary by regimes,  \code{x_v} are the regressors that vary by regimes, \code{wx} are the spatially lagged regressors, \code{h_f} are the instruments that do not vary by regimes,  \code{h_v} are the instruments that vary by regimes, \code{wh} are the spatially lagged instruments.
 #' @param data the data of class \code{data.frame}.
-#' @param listw a spatial weighting matrix
-#' @param rgv variable to identify the regimes
-#' @param wy_rg default \code{wy_rg = TRUE}, the lagged dependent variable varies by regime
+#' @param listw a spatial weighting matrix of class \code{listw}, \code{matrix} or \code{Matrix}
+#' @param rgv an object of class \code{formula} to identify the regime variables
+#' @param wy_rg default \code{wy_rg = FALSE}, the lagged dependent variable does not vary by regime (see details)
 #' @param het heteroskedastic variance-covariance matrix
 #' @param cl record calls
 #' @param object an object of class lag_regime
@@ -21,7 +21,7 @@ lag_regimes <- function(formula, data, listw, rgv,
 
 
   intro <- iv.lag.data.prep.regimes(formula, data = data, listw = listw,
-                                    wy_rg = wy_rg, rgv = rgv)
+                                    wy_rg = wy_rg, rgv = rgv, weps_rg = FALSE)
 
 
   y        <- intro[[1]]
@@ -151,7 +151,7 @@ print.summary.lag_regimes <- function(x,
 
 
 
-iv.lag.data.prep.regimes <- function(formula, data, rgv, listw, wy_rg ){
+iv.lag.data.prep.regimes <- function(formula, data, rgv, listw, wy_rg, weps_rg){
 
   #rm(list=ls())
 
@@ -166,6 +166,7 @@ iv.lag.data.prep.regimes <- function(formula, data, rgv, listw, wy_rg ){
   rgm              <-  matrix(,nrow = nrow(data), ncol = 0)
   for(i in svm)    rgm <- cbind(rgm, ifelse(splitvar ==  i, 1, 0))
 
+  l.split <- list(n, splitvar, sv, svm, rgm)
 #define w matrix
   if(!inherits(listw,c("listw", "Matrix", "matrix"))) stop("listw format unknown")
   if(inherits(listw,"listw"))  Ws <- listw2dgCMatrix(listw)
@@ -180,6 +181,9 @@ iv.lag.data.prep.regimes <- function(formula, data, rgv, listw, wy_rg ){
   parts <- length(F1)
 
   if(parts[2] != 6) stop("Formula should have six parts")
+
+  if(weps_rg && attributes(F1)$rhs[[1]]!=0) stop("If the spatial process vary by
+                                                                      regimes, all of the regressors should vary by regimes")
 
   mf <- model.frame(F1, data = data)
   y <- model.part(F1, data = mf, lhs = 1, drop = FALSE)
@@ -584,7 +588,7 @@ if(dim(whv)[2] != 0){
     stop("Not enough instruments specified: the model is not identified")
 
   ret <- list(y = y, Hmat = Hmat, Zmat = Zmat, endog = list(colnames(wy), colnames.end.f, colnames.end.V, col.end.f.l, colnames.end.vl),
-              instrum = c("X", "WX", "WWX", colinst))
+              instrum = c("X", "WX", "WWX", colinst), l.split = l.split)
   return(ret)
 }
 

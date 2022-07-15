@@ -22,19 +22,19 @@ regimes(formula, data, rgv = NULL, vc = c("homoskedastic", "groupwise"))
 \method{print}{summary.regimes}(x, digits = max(5, getOption("digits") - 3), ...)
 }
 \arguments{
-\item{formula}{a symbolic description of the model.}
+\item{formula}{a symbolic description of the model of the form \code{y ~ x_f | x_v} where \code{y} is the dependent variable, \code{x_f} are the regressors that do not vary by regimes and  \code{x_v} are the regressors that vary by regimes}
 
 \item{data}{the data of class \code{data.frame}.}
 
-\item{rgv}{variable to identify the regimes}
+\item{rgv}{an object of class \code{formula} to identify the regime variables}
 
-\item{vc}{one of ("homoskedastic", "groupwise")}
+\item{vc}{one of \code{c("homoskedastic", "groupwise")}. If \code{groupwise}, a the model VC matrix is estimated by weighted least square.}
 
-\item{object}{an object of class ivregime}
+\item{object}{an object of class regime}
 
 \item{...}{additional arguments}
 
-\item{x}{an object of class ivregime}
+\item{x}{an object of class regimes}
 
 \item{digits}{number of digits}
 }
@@ -55,8 +55,6 @@ the  regimes
 }
 \examples{
 data("baltim")
-nbB <- spdep::read.gal(system.file("extdata", "baltimore.gal", package = "hspm"))
-listw1 <- spdep::nb2listw(nbB, style = "W")
 form   <- PRICE  ~ NROOM + NBATH + PATIO + FIREPL + AC + GAR + AGE + LOTSZ + SQFT
 split  <- ~ CITCOU
 mod <- regimes(formula = form, data = baltim, rgv = split, vc = "groupwise")
