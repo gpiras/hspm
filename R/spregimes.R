@@ -16,6 +16,7 @@
 #' @examples
 #' data("natreg")
 #' data("ws_6")
+<<<<<<< HEAD
 #' form   <- HR90  ~ 0 | MA90 + PS90 +
 #' RD90 + UE90 | 0 | 0 | MA90 + PS90 +
 #' RD90 + FH90 + FP89 + GI89 | 0
@@ -30,6 +31,15 @@
 #' mod <- spregimes(formula = form, data = natreg,
 #' rgv = split, listw = ws_6, model = "sarar",
 #' het = TRUE, wy_rg = TRUE, weps_rg = TRUE)
+=======
+#' form   <- HR90  ~ 0 | MA90 + PS90 + RD90 + UE90 | 0 | 0 | MA90 + PS90 + RD90 + FH90 + FP89 + GI89 | 0
+#' split  <- ~ REGIONS
+#' mod <- spregimes(formula = form, data = natreg, rgv = split, listw = ws_6, model = "error", het = TRUE)
+#' summary(mod)
+#' mod <- spregimes(formula = form, data = natreg, rgv = split, listw = ws_6, model = "lag", het = TRUE, wy_rg = TRUE)
+#' summary(mod)
+#' mod <- spregimes(formula = form, data = natreg, rgv = split, listw = ws_6, model = "sarar", het = TRUE, wy_rg = TRUE, weps_rg = TRUE)
+>>>>>>> cdd404a237cc47cb811be65337636c3a17056ec0
 #' summary(mod)
 #'
 #'
