@@ -45,3 +45,33 @@ ols_regimes(formula, data, listw, rgv, het, cl)
 \description{
 Estimation of spatial regime models
 }
+\examples{
+data("natreg")
+data("ws_6")
+
+split  <- ~ REGIONS
+
+form <-  HR90  ~ MA90 -1 |  PS90 +
+RD90 + UE90 | MA90 | MA90 -1 |  PS90 +
+RD90 + FH90 + FP89 + GI89 | 0
+
+form1 <-  HR90  ~ MA90 -1 |  PS90 +
+RD90 + UE90 | MA90 | MA90 -1 |  PS90 +
+RD90 + FH90 + FP89 + GI89 | GI89
+
+form2 <-  HR90  ~ MA90 -1 |  PS90 +
+RD90 + UE90 | MA90 + RD90 | MA90 -1 |  PS90 +
+RD90 + FH90 + FP89 + GI89 | GI89
+
+mod <- spregimes(formula = form, data = natreg,
+rgv = split, listw = ws_6, model = "ols")
+summary(mod)
+
+mod1 <- spregimes(formula = form1, data = natreg,
+rgv = split, listw = ws_6, model = "ols")
+summary(mod1)
+
+mod2 <- spregimes(formula = form2, data = natreg,
+rgv = split, listw = ws_6, model = "ols")
+summary(mod2)
+}

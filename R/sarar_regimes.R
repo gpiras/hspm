@@ -18,6 +18,38 @@
 #' @param digits number of digits
 #'
 #'
+#'
+#' @examples
+#' data("natreg")
+#' data("ws_6")
+#' form <-  HR90  ~ 0 | MA90 + PS90 +
+#' RD90 + UE90 | 0 | 0 | MA90 + PS90 +
+#' RD90 + FH90 + FP89 + GI89 | 0
+#'
+#' form1 <-  HR90  ~ MA90 -1 |  PS90 +
+#' RD90 + UE90 | 0 | MA90 -1 |  PS90 +
+#' RD90 + FH90 + FP89 + GI89 | 0
+#'
+#' split  <- ~ REGIONS
+#'
+#' ###############################
+#' # Spatial SARAR regimes model #
+#' ###############################
+#' mod6 <- spregimes(formula = form, data = natreg,
+#' rgv = split, listw = ws_6, model = "sarar",
+#' het = TRUE, wy_rg = TRUE, weps_rg = TRUE)
+#' summary(mod6)
+#' mod7 <- spregimes(formula = form, data = natreg,
+#' rgv = split, listw = ws_6, model = "sarar",
+#' het = TRUE, wy_rg = FALSE, weps_rg = FALSE)
+#' summary(mod7)
+#' mod8 <- spregimes(formula = form1, data = natreg,
+#' rgv = split, listw = ws_6, model = "sarar",
+#' het = TRUE, wy_rg = TRUE, weps_rg = FALSE)
+#' summary(mod8)
+#'
+
+
 sarar_regimes <- function(formula, data, listw,  rgv, het,
                           weps_rg = weps_rg, wy_rg = wy_rg,
                           initial.value  = NULL,  verbose = FALSE, control, cl){

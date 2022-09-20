@@ -13,7 +13,33 @@
 #' @param x an object of class lag_regime
 #' @param digits number of digits
 
+#' @examples
+#' data("natreg")
+#' data("ws_6")
+#' form <-  HR90  ~ 0 | MA90 + PS90 +
+#' RD90 + UE90 | 0 | 0 | MA90 + PS90 +
+#' RD90 + FH90 + FP89 + GI89 | 0
 #'
+#' form1 <-  HR90  ~ MA90 -1 |  PS90 +
+#' RD90 + UE90 | 0 | MA90 -1 |  PS90 +
+#' RD90 + FH90 + FP89 + GI89 | 0
+#'
+#' split  <- ~ REGIONS
+#'
+#' ###############################
+#' #  Spatial Lag regimes model  #
+#' ###############################
+#' mod4 <- spregimes(formula = form, data = natreg,
+#' rgv = split, listw = ws_6, model = "lag",
+#' het = TRUE, wy_rg = TRUE)
+#' summary(mod4)
+#' mod5 <- spregimes(formula = form1, data = natreg,
+#' rgv = split, listw = ws_6, model = "lag",
+#' het = TRUE, wy_rg = TRUE)
+#' summary(mod5)
+#'
+
+
 lag_regimes <- function(formula, data, listw, rgv,
                    het, cl, wy_rg){
 
@@ -436,9 +462,14 @@ if(dim(xvd)[2] != 0){
   WWx.f <- Ws %*% Wx.f
   colnames(WWx.f) <- nameswwx.f
   #only for the durbin variables third power
+  if(dim(xfd)[2] !=0){
    WWWx.f <- Ws %*% WWx.f[,which(nameswx %in% namesxfd), drop = F]
+   WWWx.f <- as.matrix(WWWx.f)
+   #print(namesx.f)
+   #print(head(WWWx.f))
    colnames(WWWx.f) <- paste("WWW_",namesx.f, sep="")
-
+  }
+  else WWWx.f <- matrix(nrow = n, ncol = 0)
   }
   else {
     Wx.f <-  WWx.f <- WWWx.f <- matrix(nrow = n, ncol = 0)

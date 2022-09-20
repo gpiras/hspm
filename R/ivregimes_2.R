@@ -1,7 +1,7 @@
 
 
 ##### Functions for regimes ####
-#' @title Estimation of spatial regime models
+#' @title Estimation of spatial regime models with endogenous variables
 #' @name ivregimes
 #' @param formula a symbolic description of the model of the form \code{y ~ x_f | x_v | h_f | h_v} where \code{y} is the dependent variable, \code{x_f} are the regressors that do not vary by regimes,  \code{x_v} are the regressors that vary by regimes, \code{h_f} are the fixed instruments and \code{h_v} are the instruments that vary by regimes.
 #' @param data the data of class \code{data.frame}.
@@ -20,7 +20,7 @@
 #' \deqn{
 #' y_{ij}= \mathbf{x_{ij,k}}\beta_j + \mathbf{Y_{ij,k}}\gamma_j + \epsilon
 #' }
-#' for i=1,..,n representing the sample observations, and j =1,..., J representing
+#' for i=1,..,n representing the sample observations, and j = 1,..., J representing
 #' the  regimes
 
 #' @examples
@@ -29,7 +29,11 @@
 #' split  <- ~ REGIONS
 #' mod <- ivregimes(formula = form, data = natreg, rgv = split, vc = "robust")
 #' summary(mod)
-
+#' mod1 <- ivregimes(formula = form, data = natreg, rgv = split, vc = "OGMM")
+#' summary(mod1)
+#' form1   <- HR90  ~ MA90 + PS90 |  RD90 + UE90 -1 | MA90 + PS90 | RD90 + FH90 + FP89 + GI89 -1
+#' mod2 <- ivregimes(formula = form1, data = natreg, rgv = split, vc = "classical")
+#' summary(mod2)
 #'
 #' @author Gianfranco Piras and Mauricio Sarrias
 #' @return An object of class \code{ivregimes}

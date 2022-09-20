@@ -11,8 +11,40 @@
 #' @param ... additional arguments
 #' @param x an object of class ols_regimes
 #' @param digits number of digits
-
 #'
+#'
+#' @examples
+#' data("natreg")
+#' data("ws_6")
+#'
+#' split  <- ~ REGIONS
+#'
+#' form <-  HR90  ~ MA90 -1 |  PS90 +
+#' RD90 + UE90 | MA90 | MA90 -1 |  PS90 +
+#' RD90 + FH90 + FP89 + GI89 | 0
+#'
+#' form1 <-  HR90  ~ MA90 -1 |  PS90 +
+#' RD90 + UE90 | MA90 | MA90 -1 |  PS90 +
+#' RD90 + FH90 + FP89 + GI89 | GI89
+#'
+#' form2 <-  HR90  ~ MA90 -1 |  PS90 +
+#' RD90 + UE90 | MA90 + RD90 | MA90 -1 |  PS90 +
+#' RD90 + FH90 + FP89 + GI89 | GI89
+#'
+#' mod <- spregimes(formula = form, data = natreg,
+#' rgv = split, listw = ws_6, model = "ols")
+#' summary(mod)
+#'
+#' mod1 <- spregimes(formula = form1, data = natreg,
+#' rgv = split, listw = ws_6, model = "ols")
+#' summary(mod1)
+#'
+#' mod2 <- spregimes(formula = form2, data = natreg,
+#' rgv = split, listw = ws_6, model = "ols")
+#' summary(mod2)
+
+
+
 
 ols_regimes <- function(formula, data, listw, rgv,
                         het, cl){
@@ -233,19 +265,17 @@ ols.data.prep.regimes <- function(formula, data, rgv, listw,
   # variables for Durbin
 
   wx <- model.matrix(F1, data = mf, rhs = 3, drop = FALSE)
-
-  if(any(colnames(wx) == "(Intercept)")) wx <- wx[,-which(colnames(wx) == "(Intercept)")]
-  nameswx <-  colnames(wx)
-   #print(head(wx))
-
+ nmwx <- colnames(wx)
+  if(any(nmwx == "(Intercept)")) {
+    wx <- as.matrix(wx[,-which(colnames(wx) == "(Intercept)")])
+    colnames(wx) <- nmwx[-which(nmwx == "(Intercept)")]
+    }
+nameswx <-  colnames(wx)
   #check if Durbin are fixed or variable
   xfd  <- wx[,(nameswx %in% namesxf), drop = FALSE]
   xvd  <- wx[,(nameswx %in%  namesxv), drop = FALSE]
   namesxfd <- colnames(xfd)
   namesxvd <- colnames(xvd)
-
-  #print(head(xfd))
-  #print(head(xvd))
 
   ### if x is fixed wx is fixed
   if(dim(xfd)[2] !=0){
@@ -518,7 +548,7 @@ if(!is.null(namesH)){
     colinst <-  NULL
   }
   ret <- list(y = y, Hmat = Hmat, Zmat = Zmat, endog = endog,
-              instrum = colinst, l.split = l.split, Ws = Ws)
+              instrum = c("X", "WX", "WWX", colinst), l.split = l.split, Ws = Ws)
   return(ret)
 }
 

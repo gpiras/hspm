@@ -19,7 +19,7 @@ spregimes(
 )
 }
 \arguments{
-\item{formula}{a symbolic description of the model of the form \code{y ~ x_f | x_v | wx | h_f | h_v | wh} where \code{y} is the dependent variable, \code{x_f} are the regressors that do not vary by regimes,  \code{x_v} are the regressors that vary by regimes, \code{wx} are the spatially lagged regressors, \code{h_f} are the instruments that do not vary by regimes,  \code{h_v} are the instruments that vary by regimes, \code{wh} are the spatially lagged instruments.}
+\item{formula}{a symbolic description of the model of the form \code{y ~ x_f | x_v | wx | h_f | h_v | wh}; where \code{y} is the dependent variable, \code{x_f} are the regressors that do not vary by regimes,  \code{x_v} are the regressors that vary by regimes, \code{wx} are the spatially lagged regressors, \code{h_f} are the instruments that do not vary by regimes,  \code{h_v} are the instruments that vary by regimes, \code{wh} are the spatially lagged instruments.}
 
 \item{data}{the data of class \code{data.frame}.}
 
@@ -58,20 +58,57 @@ data("ws_6")
 form <-  HR90  ~ 0 | MA90 + PS90 +
 RD90 + UE90 | 0 | 0 | MA90 + PS90 +
 RD90 + FH90 + FP89 + GI89 | 0
+
+form1 <-  HR90  ~ MA90 -1 |  PS90 +
+RD90 + UE90 | 0 | MA90 -1 |  PS90 +
+RD90 + FH90 + FP89 + GI89 | 0
+
 split  <- ~ REGIONS
+
+###############################
+# Spatial Error regimes model #
+###############################
 mod <- spregimes(formula = form, data = natreg,
 rgv = split, listw = ws_6, model = "error", het = TRUE)
 summary(mod)
-mod <- spregimes(formula = form, data = natreg,
+mod1 <- spregimes(formula = form, data = natreg,
+rgv = split, listw = ws_6, model = "error",
+weps_rg = TRUE, het = TRUE)
+summary(mod1)
+mod2 <- spregimes(formula = form1, data = natreg,
+rgv = split, listw = ws_6, model = "error", het = TRUE)
+summary(mod2)
+\dontrun{mod3 <- spregimes(formula = form1, data = natreg,
+rgv = split, listw = ws_6, model = "error", weps_rg = TRUE, het = TRUE)
+summary(mod3)}
+
+###############################
+#  Spatial Lag regimes model  #
+###############################
+mod4 <- spregimes(formula = form, data = natreg,
 rgv = split, listw = ws_6, model = "lag",
 het = TRUE, wy_rg = TRUE)
-summary(mod)
-mod <- spregimes(formula = form, data = natreg,
+summary(mod4)
+mod5 <- spregimes(formula = form1, data = natreg,
+rgv = split, listw = ws_6, model = "lag",
+het = TRUE, wy_rg = TRUE)
+summary(mod5)
+
+###############################
+# Spatial SARAR regimes model #
+###############################
+mod6 <- spregimes(formula = form, data = natreg,
 rgv = split, listw = ws_6, model = "sarar",
 het = TRUE, wy_rg = TRUE, weps_rg = TRUE)
-summary(mod)
-
-
+summary(mod6)
+mod7 <- spregimes(formula = form, data = natreg,
+rgv = split, listw = ws_6, model = "sarar",
+het = TRUE, wy_rg = FALSE, weps_rg = FALSE)
+summary(mod7)
+mod8 <- spregimes(formula = form1, data = natreg,
+rgv = split, listw = ws_6, model = "sarar",
+het = TRUE, wy_rg = TRUE, weps_rg = FALSE)
+summary(mod8)
 }
 \author{
 Gianfranco Piras and Mauricio Sarrias

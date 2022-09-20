@@ -4,7 +4,7 @@
 #' ##### Functions for regimes ####
 #' #' Estimation of spatial regime models
 #' #' @name ivregimes
-#' #' @param formula a symbolic description of the model.
+#' #' @param formula a symbolic description of the model. \code{y ~ x_f | x_v | h_f | h_v} where \code{y} is the dependent variable, \code{x_f} are the regressors that do not vary by regimes,  \code{x_v} are the regressors that vary by regimes, \code{h_f} are the instruments that do not vary by regimes, and  \code{h_v} are the instruments that vary by regimes.
 #' #' @param data the data of class \code{data.frame}.
 #' #' @param rgv variable to identify the regimes
 #' #' @param vc   one of ("classical", "robust", "OGMM")

@@ -7,7 +7,7 @@
 \alias{print.ivregimes}
 \alias{summary.ivregimes}
 \alias{print.summary.ivregimes}
-\title{Estimation of spatial regime models}
+\title{Estimation of spatial regime models with endogenous variables}
 \usage{
 ivregimes(formula, data, rgv = NULL, vc = c("classical", "robust", "OGMM"))
 
@@ -42,7 +42,7 @@ ivregimes(formula, data, rgv = NULL, vc = c("classical", "robust", "OGMM"))
 An object of class \code{ivregimes}
 }
 \description{
-Estimation of spatial regime models
+Estimation of spatial regime models with endogenous variables
 }
 \details{
 The model estimated is:
@@ -50,7 +50,7 @@ The model estimated is:
 \deqn{
 y_{ij}= \mathbf{x_{ij,k}}\beta_j + \mathbf{Y_{ij,k}}\gamma_j + \epsilon
 }
-for i=1,..,n representing the sample observations, and j =1,..., J representing
+for i=1,..,n representing the sample observations, and j = 1,..., J representing
 the  regimes
 }
 \examples{
@@ -59,6 +59,11 @@ form   <- HR90  ~ 0 | MA90 + PS90 + RD90 + UE90 | 0 | MA90 + PS90 + RD90 + FH90 
 split  <- ~ REGIONS
 mod <- ivregimes(formula = form, data = natreg, rgv = split, vc = "robust")
 summary(mod)
+mod1 <- ivregimes(formula = form, data = natreg, rgv = split, vc = "OGMM")
+summary(mod1)
+form1   <- HR90  ~ MA90 + PS90 |  RD90 + UE90 -1 | MA90 + PS90 | RD90 + FH90 + FP89 + GI89 -1
+mod2 <- ivregimes(formula = form1, data = natreg, rgv = split, vc = "classical")
+summary(mod2)
 
 }
 \author{

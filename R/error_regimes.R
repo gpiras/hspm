@@ -17,6 +17,36 @@
 #' @param digits number of digits
 #'
 #'
+#'
+#' @examples
+#' data("natreg")
+#' data("ws_6")
+#' form <-  HR90  ~ 0 | MA90 + PS90 +
+#' RD90 + UE90 | 0 | 0 | MA90 + PS90 +
+#' RD90 + FH90 + FP89 + GI89 | 0
+#'
+#' form1 <-  HR90  ~ MA90 -1 |  PS90 +
+#' RD90 + UE90 | 0 | MA90 -1 |  PS90 +
+#' RD90 + FH90 + FP89 + GI89 | 0
+#'
+#' split  <- ~ REGIONS
+#'
+#' ###############################
+#' # spatial error regimes model #
+#' ###############################
+#' mod <- spregimes(formula = form, data = natreg,
+#' rgv = split, listw = ws_6, model = "error", het = TRUE)
+#' summary(mod)
+#' mod1 <- spregimes(formula = form, data = natreg,
+#' rgv = split, listw = ws_6, model = "error",
+#' weps_rg = TRUE, het = TRUE)
+#' summary(mod1)
+#' mod2 <- spregimes(formula = form1, data = natreg,
+#' rgv = split, listw = ws_6, model = "error", het = TRUE)
+#' summary(mod2)
+#' \dontrun{mod3 <- spregimes(formula = form1, data = natreg,
+#' rgv = split, listw = ws_6, model = "error", weps_rg = TRUE, het = TRUE)
+#' summary(mod3)}
 error_regimes <- function(formula, data, listw,  rgv, weps_rg = FALSE,
                           initial.value  = NULL, het, verbose = FALSE, control, cl){
 
