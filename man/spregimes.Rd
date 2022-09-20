@@ -55,7 +55,7 @@ The regressors can be either "fixed" or varying by regime. However, if \code{wep
 \examples{
 data("natreg")
 data("ws_6")
-form <- HR90  ~ 0 | MA90 + PS90 +
+form <-  HR90  ~ 0 | MA90 + PS90 +
 RD90 + UE90 | 0 | 0 | MA90 + PS90 +
 RD90 + FH90 + FP89 + GI89 | 0
 split  <- ~ REGIONS
