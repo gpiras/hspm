@@ -55,11 +55,11 @@ lag_regimes <- function(formula, data, listw, rgv,
   Zmat     <- intro[[3]]
   colnames.end<- intro[[4]]
   colnames.instr <- intro[[5]]
-
+  colinstr <- intro[[8]]
 
 
   res <- spatial.ivreg.regimes(as.matrix(y), as.matrix(Zmat), as.matrix(Hmat), het)
-  res <- list(res, cl, colnames.end,  colnames.instr)
+  res <- list(res, cl, colnames.end,  colnames.instr, colinstr)
   class(res) <- "lag_regimes"
   return(res)
 
@@ -131,7 +131,7 @@ print.summary.lag_regimes <- function(x,
                                     digits = max(5, getOption("digits") - 3),
                                     ...)
 {
-  if(length(x[[4]]) == 3){
+  if(is.null(x[[5]])){
   cat("        ------------------------------------------------------------\n")
   cat("                          Spatial Lag Regimes Model \n")
   cat("        ------------------------------------------------------------\n")
@@ -179,7 +179,6 @@ print.summary.lag_regimes <- function(x,
 
 iv.lag.data.prep.regimes <- function(formula, data, rgv, listw, wy_rg, weps_rg){
 
-  #rm(list=ls())
 
   #define the split variable
   if(is.null(rgv)) stop("regimes variable not specified")
@@ -213,21 +212,19 @@ iv.lag.data.prep.regimes <- function(formula, data, rgv, listw, wy_rg, weps_rg){
 
   mf <- model.frame(F1, data = data)
   y <- model.part(F1, data = mf, lhs = 1, drop = FALSE)
- #head(y)
+
 #check if wy is "variable" or not: argument wy_rg
-##this lines are creating a wy with no interactions within regimes
+
   if(wy_rg){
     wy <- Matrix(0, nrow = n, ncol = sv)
-# for(i in 1:sv) wy[,i] <- (Ws %*% (as.matrix(y)*rgm[,i]))*rgm[,i]
     for(i in 1:sv) wy[,i] <- Ws %*% (as.matrix(y)*rgm[,i])
-colnames(wy) <- paste("W_",paste(colnames(y),rep(1:sv), sep = "_"), sep="")
+    colnames(wy) <- paste("W_",paste(colnames(y),rep(1:sv), sep = "_"), sep="")
   }
 else{
-  wy <- Ws %*% as.matrix(y)
-  colnames(wy) <- paste("W_", colnames(y), sep ="")
+    wy <- Ws %*% as.matrix(y)
+    colnames(wy) <- paste("W_", colnames(y), sep ="")
 }
 
-#head(wy)
 
  ###############################
   ###############################
@@ -241,7 +238,6 @@ else{
   ## extract X variable
   Xv <- model.matrix(F1, data = mf, rhs = 2, drop = FALSE)
   namesxv <-  colnames(Xv)
-
 
   if(any(namesxf == "(Intercept)") && any(namesxv == "(Intercept)"))
     stop("(Intercept) cannot  be specified as fixed and variable regressor at the same time!")
@@ -258,32 +254,26 @@ if(dim(Xv)[2] != 0){
   namesxV <- paste(namesxv,rep(1:sv,each = k2), sep = "_")
   colnames(XV) <- namesxV
 }
- # head(Xf)
-  #head(XV)
-#head(rgm)
 
-###############################
+  ###############################
   ###############################
   ##### Formula 3  wx
   ###############################
   ###############################
- # variables for Durbin
+  # variables for Durbin
 
   wx <- model.matrix(F1, data = mf, rhs = 3, drop = FALSE)
 
   if(any(colnames(wx) == "(Intercept)")) wx <- wx[,-which(colnames(wx) == "(Intercept)")]
+  wx <- as.matrix(wx)
   nameswx <-  colnames(wx)
- # head(wx)
 
 #check if Durbin are fixed or variable
   xfd  <- wx[,(nameswx %in% namesxf), drop = FALSE]
   xvd  <- wx[,(nameswx %in%  namesxv), drop = FALSE]
   namesxfd <- colnames(xfd)
   namesxvd <- colnames(xvd)
-
-  #head(xfd)
-  #head(xvd)
-
+  namesd <- c(namesxfd, namesxvd)
   ### if x is fixed wx is fixed
  if(dim(xfd)[2] !=0){
   Wxf <- Ws %*% xfd
@@ -294,27 +284,14 @@ if(dim(Xv)[2] != 0){
     colnames(Wxf) <- NULL
   }
 
-#head(Xf)
-#head(xfd)
-#head(Wxf)
-
-### if x varies wx varies
+  ### if x varies wx varies
 if(dim(xvd)[2] != 0){
-
   namesxvD <- paste(namesxvd,rep(1:sv,each = ncol(xvd)), sep = "_")
   xvD  <- XV[, which(namesxV %in% namesxvD), drop = FALSE]
-
-#head(xvD)
-#head(XV)
-
-####take into account that xvD is a matrix
   WxvD <- matrix(0, ncol = ncol(xvD), nrow = n)
   seq_1 <- seq(1, ncol(xvD), ncol(xvD)/sv)
   seq_2 <- seq(ncol(xvD)/sv, ncol(xvD),  ncol(xvD)/sv)
-
-#  for (i in 1: (ncol(xvD)/sv)) WxvD[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (xvD[,seq_1[i]:seq_2[i]]*rgm[,i]))*rgm[,i])
- # for (i in 1: (ncol(xvD)/sv)) WxvD[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (xvD[,seq_1[i]:seq_2[i]])))
-  for (i in 1: sv) WxvD[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (xvD[,seq_1[i]:seq_2[i]])))
+for (i in 1: sv) WxvD[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (xvD[,seq_1[i]:seq_2[i]])))
   nameswxv <- paste("W_",colnames(xvD), sep="")
   colnames(WxvD) <- nameswxv
 }
@@ -323,14 +300,8 @@ if(dim(xvd)[2] != 0){
     xvD <- matrix(nrow = n, ncol = 0)
     WxvD <- matrix(nrow = n, ncol = 0)
   }
- # head(xvD)
-#  head(WxvD)
-
-
 
   Zmat <- cbind(Xf, XV, Wxf, WxvD, wy)
-#head(Zmat)
-#head(rgm)
 
 
 ###############################
@@ -378,11 +349,6 @@ if(dim(xvd)[2] != 0){
     ZV <- matrix(nrow = n, ncol = 0)
     nameszv <- NULL
   }
-  #head(Zf)
-  #head(ZV)
-
-  #head(Zf)
-  #head(Zv)
 
   ### 1) endog in X but not in Z (only needed for summary)
   end.f <- Xf[, !(colnames(Xf) %in% colnames(Zf)), drop = FALSE]
@@ -393,25 +359,18 @@ if(dim(xvd)[2] != 0){
   end.fl <- xfd[, (colnames(xfd) %in% colnames(end.f)), drop = FALSE]
   end.vl <- xvd[, (colnames(xvd) %in% colnames(end.v)), drop = FALSE]
   col.end.f.l <- colnames(end.fl)
-
-    if (dim(end.v)[2] != 0) colnames.end.V <- paste(colnames.end.v, rep(1:sv, each = length(colnames(end.vl))) , sep = "_")
+  if (dim(end.v)[2] != 0) colnames.end.V <- paste(colnames.end.v, rep(1:sv, each = length(colnames(end.vl))) , sep = "_")
   else colnames.end.V <- NULL
-
   if(!is.null(colnames(end.fl))) colnames.end.fl <- paste("W_",colnames(end.fl), sep ="")
   else colnames.end.fl <- NULL
   if(!is.null(colnames(end.vl))) colnames.end.vl <- paste("W_", paste(colnames(end.vl), rep(1:sv,each = length(colnames(end.vl))), sep = "_"), sep = "")
   else colnames.end.vl <- NULL
-  #if(!is.null(colnames(end.vl))) colnames.end.V.l <- paste("W_", paste(colnames(end.vl), rep(1:sv,each = length(colnames(end.vl))), sep = "_"), sep = "")
-  #else colnames.end.V.l <- NULL
 
 
   ### 2) external instr not in x but only in z
-  # add the external instr
   instr.F <- Zf[ , !(colnames(Zf) %in% colnames(Xf)), drop = FALSE]
   instr.V <- Zv[ , !(colnames(Zv) %in% colnames(Xv)), drop = FALSE]
-
   if(dim(instr.V)[2] != 0){
-
     k3 <- dim(instr.V)[2]
     totz <- sv*k3
     instr.VV <- matrix(0, ncol = totz, nrow = n)
@@ -424,119 +383,79 @@ if(dim(xvd)[2] != 0){
     instr.VV <- matrix(nrow = n, ncol = 0)
     colnames(instr.VV) <- NULL
   }
-
   namesinstr.F <- colnames(Zf[ , !(colnames(Zf) %in% colnames(Xf)), drop = FALSE])
   namesinstr.V <- colnames(Zv[ , !(colnames(Zv) %in% colnames(Xv)), drop = FALSE])
-
   if(length(namesinstr.V) !=0) namesinstr.VV <-  paste(namesinstr.V, rep(1:sv,each = length(namesinstr.V)) , sep = "_")
   else namesinstr.VV <- NULL
-  ##need to for pinting and check identification
+  ##needed  for printing and check identification
   nameInsts <- c(namesinstr.F, namesinstr.V)
   nameInst <- c(namesinstr.F, namesinstr.VV)
 
- # head(end.f)
-  #head(end.v)
-  #head(end.fl)
-#head(end.vl)
 
   ### 3) esog in both
   x.ff <- Xf[, (colnames(Xf) %in% colnames(Zf)), drop = FALSE]
   x.vv <- Xv[, (colnames(Xv) %in% colnames(Zv)), drop = FALSE]
-
  if(any(colnames(x.ff) == "(Intercept)")) x.f <- x.ff[,-which(colnames(x.ff) == "(Intercept)")]
   else x.f <- x.ff
   if(any(colnames(x.vv) == "(Intercept)")) x.v <- x.vv[,-which(colnames(x.vv) == "(Intercept)")]
   else x.v <- x.vv
- # head(x.f)
-#  head(x.v)
-  ##need to build the instruments (remenber  for the intercept)
-
   if(dim(x.f)[2] != 0){
-
     namesx.f <- colnames(x.f)
     nameswx.f <- paste("W_",namesx.f, sep="")
     nameswwx.f <- paste("WW_",namesx.f, sep="")
-
-  Wx.f <- Ws %*% x.f
-  colnames(Wx.f) <- nameswx.f
-  WWx.f <- Ws %*% Wx.f
-  colnames(WWx.f) <- nameswwx.f
-  #only for the durbin variables third power
+    Wx.f <- Ws %*% x.f
+    colnames(Wx.f) <- nameswx.f
+    WWx.f <- Ws %*% Wx.f
+    colnames(WWx.f) <- nameswwx.f
   if(dim(xfd)[2] !=0){
    WWWx.f <- Ws %*% WWx.f[,which(nameswx %in% namesxfd), drop = F]
    WWWx.f <- as.matrix(WWWx.f)
-   #print(namesx.f)
-   #print(head(WWWx.f))
-   colnames(WWWx.f) <- paste("WWW_",namesx.f, sep="")
+   colnames(WWWx.f) <- paste("WWW_", namesxfd, sep="")
   }
   else WWWx.f <- matrix(nrow = n, ncol = 0)
   }
   else {
     Wx.f <-  WWx.f <- WWWx.f <- matrix(nrow = n, ncol = 0)
     namesx.f <-  namesx.v <- nameswx.f <- nameswwx.f <- NULL
-
   }
-Hx.fne <- cbind(x.ff, Wx.f, WWx.f, WWWx.f,instr.F)
+Hx.fne <- cbind(x.ff, Wx.f, WWx.f, WWWx.f, instr.F)
 
- #  head(Hx.fne)
-   ### now the x.v
-
-
-   if(dim(x.v)[2] != 0 ){
-     ####only to get the intercept if available###
-
+ if(dim(x.v)[2] != 0 ){
      namesx.vv <- colnames(x.vv)
      namesx.VV <-  paste(namesx.vv, rep(1:sv, each = length(namesx.vv)), sep = "_")
      x.VV <- XV[,which(namesxV %in% namesx.VV), drop = F]
-#head(x.VV)
-     ###############################################
      namesx.v <- colnames(x.v)
      namesx.V <-  paste(namesx.v, rep(1:sv, each = length(namesx.v)), sep = "_")
      x.V <- XV[,which(namesxV %in% namesx.V), drop = F]
-  # head(x.V)
-
-   Wx.V <- matrix(0, ncol = ncol(x.V), nrow = n)
-   seq_1 <- seq(1, ncol(x.V), (ncol(x.V)/sv))
-   seq_2 <- seq(ncol(x.V)/sv, ncol(x.V),ncol(x.V)/sv  )
-
-   # for(i in 1:sv)  Wx.V[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (x.V[,seq_1[i]:seq_2[i]]*rgm[,i]))*rgm[,i])
-   for(i in 1:sv)  Wx.V[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (x.V[,seq_1[i]:seq_2[i]])))
-   nameswx.V <- paste("W_",colnames(x.V), sep="")
-   colnames(Wx.V) <- nameswx.V
-    #head(Wx.V)
-    WWx.V <- matrix(0, ncol = ncol(x.V), nrow = n)
-    # for (i in 1: sv) WWx.V[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (Wx.V[,seq_1[i]:seq_2[i]]*rgm[,i]))*rgm[,i])
-    for (i in 1: sv) WWx.V[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (Wx.V[,seq_1[i]:seq_2[i]])))
-    nameswwx.V <- paste("WW_",colnames(x.V), sep="")
-    colnames(WWx.V) <- nameswwx.V
-
-    WWx.Vfd <- WWx.V[,which(namesx.V %in% colnames(xvD))]
-
-     if(dim(WWx.Vfd)[2] != 0){
-    seq_1 <- seq(1, ncol(WWx.Vfd),ncol(WWx.Vfd)/ sv)
-    seq_2 <- seq(ncol(WWx.Vfd)/ sv, ncol(WWx.Vfd),  ncol(WWx.Vfd)/ sv)
-    WWWx.V <- matrix(0, ncol = ncol(WWx.Vfd), nrow = n)
-    # for (i in 1: (ncol(WWx.Vfd)/sv)) WWWx.V[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (WWx.Vfd[,seq_1[i]:seq_2[i]]*rgm[,i]))*rgm[,i])
-    #for (i in 1: (ncol(WWx.Vfd)/sv)) WWWx.V[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (WWx.Vfd[,seq_1[i]:seq_2[i]])))
-    for (i in 1:sv) WWWx.V[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (WWx.Vfd[,seq_1[i]:seq_2[i]])))
-    nameswwwx.V <- paste("W",colnames(WWx.Vfd), sep="")
-    colnames(WWWx.V) <- nameswwwx.V
+     Wx.V <- matrix(0, ncol = ncol(x.V), nrow = n)
+     seq_1 <- seq(1, ncol(x.V), (ncol(x.V)/sv))
+     seq_2 <- seq(ncol(x.V)/sv, ncol(x.V),ncol(x.V)/sv)
+     for(i in 1:sv)  Wx.V[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (x.V[,seq_1[i]:seq_2[i]])))
+     nameswx.V <- paste("W_",colnames(x.V), sep="")
+     colnames(Wx.V) <- nameswx.V
+     WWx.V <- matrix(0, ncol = ncol(x.V), nrow = n)
+     for (i in 1: sv) WWx.V[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (Wx.V[,seq_1[i]:seq_2[i]])))
+     nameswwx.V <- paste("WW_",colnames(x.V), sep="")
+     colnames(WWx.V) <- nameswwx.V
+     WWx.Vfd <- WWx.V[,which(namesx.V %in% colnames(xvD))]
+       if(dim(WWx.Vfd)[2] != 0){
+            seq_1 <- seq(1, ncol(WWx.Vfd),ncol(WWx.Vfd)/ sv)
+            seq_2 <- seq(ncol(WWx.Vfd)/ sv, ncol(WWx.Vfd),  ncol(WWx.Vfd)/ sv)
+            WWWx.V <- matrix(0, ncol = ncol(WWx.Vfd), nrow = n)
+              for (i in 1:sv) WWWx.V[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (WWx.Vfd[,seq_1[i]:seq_2[i]])))
+            nameswwwx.V <- paste("W",colnames(WWx.Vfd), sep="")
+            colnames(WWWx.V) <- nameswwwx.V
      }
     else WWWx.V <- matrix(nrow = n, ncol = 0)
-
     if(length(colnames.end.V) != 0) colnames.end.V <- paste(colnames.end.v, rep(1:sv, each = length(colnames.end.v)), sep = "_")
     else colnames.end.V <- NULL
-
-
    }
    else{
      Wx.V <- WWx.V <-  WWWx.V <- matrix(nrow = n, ncol = 0)
      colnames.end.V <- paste(colnames.end.v, rep(1:sv, each = length(colnames.end.v)), sep = "_")
-
    }
+Hx.vne <- cbind(x.VV, Wx.V, WWx.V, WWWx.V, instr.VV)
 
-    Hx.vne <- cbind(x.VV, Wx.V, WWx.V, WWWx.V, instr.VV)
-    #head(Hx.vne)
   ###############################
   ###############################
   ##### Formula 6  winst
@@ -558,8 +477,6 @@ Hx.fne <- cbind(x.ff, Wx.f, WWx.f, WWWx.f,instr.F)
 
  whf  <- wh[,(colnames(wh) %in% colnames(Zf)), drop = FALSE]
  whv  <- wh[,(colnames(wh) %in%  colnames(Zv)), drop = FALSE]
- #if(dim(whf)[2] !=0) nameswhf <- colnames(whf)
- #else nameswhf <- NULL
 
 
  if(dim(whf)[2] != 0){
@@ -580,20 +497,15 @@ if(dim(whv)[2] != 0){
  WhvD <- matrix(0, ncol = ncol(hvD), nrow = n)
  seq_1 <- seq(1, ncol(hvD), sv)
  seq_2 <- seq(sv, ncol(hvD),  sv)
-
- # for (i in 1: (ncol(hvD)/sv)) WhvD[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (hvD[,seq_1[i]:seq_2[i]]*rgm[,i]))*rgm[,i])
- #for (i in 1: (ncol(hvD)/sv)) WhvD[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (hvD[,seq_1[i]:seq_2[i]])))
  for (i in 1: sv) WhvD[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (hvD[,seq_1[i]:seq_2[i]])))
  nameswhv <- paste("W_",colnames(hvD), sep="")
  colnames(WhvD) <- nameswhv
-
     }
     else {
       WhvD <- matrix(nrow = n, ncol = 0)
       nameswhv <- NULL
     }
 }
- #head(WhvD)
  else{
    winsf <- matrix(nrow = n, ncol = 0 )
    nameswhf <- NULL
@@ -602,24 +514,27 @@ if(dim(whv)[2] != 0){
  }
 
  Hmat <- cbind(Hx.fne, Hx.vne, winsf, WhvD)
-#head(Hmat)
  Hmat <- Hmat[, qr(Hmat)$pivot[seq_len(qr(Hmat)$rank)]]
-#head(Hmat)
 
-## if instruments check identification
-
-
-  colinst <- c(nameInst, nameswhf, nameswhv)
+colinstr <- c(nameInst, nameswhf, nameswhv)
 
 
-
-
-
-  if(length(colinst) < length(c(colnames.end.f, colnames.end.V, col.end.f.l, colnames.end.vl)))
+  if(length(colinstr) < length(c(colnames.end.f, colnames.end.V, col.end.f.l, colnames.end.vl)))
     stop("Not enough instruments specified: the model is not identified")
 
-  ret <- list(y = y, Hmat = Hmat, Zmat = Zmat, endog = list(colnames(wy), colnames.end.f, colnames.end.V, col.end.f.l, colnames.end.vl),
-              instrum = c("X", "WX", "WWX", colinst), l.split = l.split)
+
+
+if(!is.null(colinstr)) {
+  if(!is.null(namesd)) colinst <- c("X", "WX","WWX", "WWWX", colinstr)
+  else colinst <- c("X", "WX","WWX",  colinstr)
+}
+  else {
+    if(!is.null(namesd)) colinst <- c("X", "WX","WWX","WWWX")
+    else colinst <- c("X", "WX","WWX")
+    }
+
+ ret <- list(y = y, Hmat = Hmat, Zmat = Zmat, endog = list(colnames(wy), colnames.end.f, colnames.end.V, col.end.f.l, colnames.end.vl),
+              instrum = colinst, l.split = l.split, ws = Ws, colinstr = colinstr)
   return(ret)
 }
 
@@ -636,7 +551,6 @@ spatial.ivreg.regimes <-function(y, Zmat, Hmat, het){
   delta <- crossprod(ZpZpi,Zpy)
   yp <- Zmat %*% delta
   e <- y - yp
-  #	print(dim(e))
 
     if(het)	{
 

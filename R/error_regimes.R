@@ -170,7 +170,7 @@ print.summary.error_regimes <- function(x,
                                       digits = max(5, getOption("digits") - 3),
                                       ...)
 {
-  if(!is.null(x[[4]])){
+  if(!is.null(unlist(x[[3]]))){
     cat("        ------------------------------------------------------------\n")
     cat("                         Spatial Error Regimes Model      \n")
     cat("                      and additional endogenous variables               \n")

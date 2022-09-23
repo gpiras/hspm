@@ -64,16 +64,18 @@ sarar_regimes <- function(formula, data, listw,  rgv, het,
   colnames.end   <- intro[[4]]
   colnames.instr <- intro[[5]]
   l.split <- intro[[6]]
-  Ws <- listw
+  Ws <- intro[[7]]
+  colinstr <- intro[[8]]
   n <- dim(Ws)[1]
   sv <- l.split[[3]]
+
 
   f.step <- spatial.ivreg.regimes(as.matrix(y), as.matrix(Zmat), as.matrix(Hmat), het)
   ubase <- f.step[[3]]
 
   ### initial values for optimization
   pars <- in.val(weps_rg = weps_rg, initial.value = initial.value,
-                 Ws = Ws, ubase = ubase, sv = l.split[[3]])
+                 Ws = Ws, ubase = ubase, sv = sv)
 
   ##error part
   rhotilde <- error_part_regime(pars = pars, l.split = l.split,
@@ -81,14 +83,14 @@ sarar_regimes <- function(formula, data, listw,  rgv, het,
                                 ubase = ubase, n = n, weps_rg = weps_rg,
                                 verbose = verbose, control = control)
 
+  ##co_transform_sarar includes second estimation
   out <- co_transform_sarar(rhotilde = rhotilde, y = y,
                       Zmat = Zmat, Hmat = Hmat,
                       l.split = l.split, Ws = Ws, het = het, wy_rg = wy_rg)
 
   delta <- out[[1]]
   utildeb <- out[[2]]
-  #k <- out[[3]]
-  #print(delta)
+  ##calculates the vc matrix final
   res <- error_efficient_regime(Ws = Ws, utildeb = utildeb,
                                 n = n, weps_rg = weps_rg,
                                 l.split = l.split,
@@ -97,7 +99,7 @@ sarar_regimes <- function(formula, data, listw,  rgv, het,
                                 control = control, het = het,
                                 verbose = verbose, delta = delta)
 
-  res <- list(res, cl, colnames.end,  colnames.instr)
+  res <- list(res, cl, colnames.end,  colnames.instr, colinstr)
   #print(res)
   class(res) <- "sarar_regimes"
   return(res)
@@ -171,7 +173,7 @@ print.summary.sarar_regimes <- function(x,
                                         digits = max(5, getOption("digits") - 3),
                                         ...)
 {
-  if(!is.null(x[[4]])){
+  if(!is.null(x[[5]])){
     cat("        ------------------------------------------------------------\n")
     cat("                         Spatial SARAR Regimes Model      \n")
     cat("                      and additional endogenous variables               \n")
@@ -213,7 +215,7 @@ print.summary.sarar_regimes <- function(x,
 in.val <- function(weps_rg, initial.value = NULL, Ws, ubase, sv){
   if(weps_rg){
     if (is.null(initial.value)){
-      Wubase <- Ws %*% ubase
+      Wubase <- Ws %*% as.matrix(ubase)
       pars <- rep(coefficients(lm(as.numeric(ubase) ~ as.numeric(Wubase)-1)), sv)
     }
     else {
@@ -223,7 +225,7 @@ in.val <- function(weps_rg, initial.value = NULL, Ws, ubase, sv){
   }
   else{
     if (is.null(initial.value)){
-      Wubase <- Ws %*% ubase
+      Wubase <- Ws %*% as.matrix(ubase)
       pars <- coefficients(lm(as.numeric(ubase) ~ as.numeric(Wubase)-1))
     }
     else {
