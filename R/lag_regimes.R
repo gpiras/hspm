@@ -57,7 +57,6 @@ lag_regimes <- function(formula, data, listw, rgv,
   colnames.instr <- intro[[5]]
   colinstr <- intro[[8]]
 
-
   res <- spatial.ivreg.regimes(as.matrix(y), as.matrix(Zmat), as.matrix(Hmat), het)
   res <- list(res, cl, colnames.end,  colnames.instr, colinstr)
   class(res) <- "lag_regimes"
@@ -254,7 +253,9 @@ if(dim(Xv)[2] != 0){
   namesxV <- paste(namesxv,rep(1:sv,each = k2), sep = "_")
   colnames(XV) <- namesxV
 }
-
+else{
+  XV <- matrix(0, ncol = 0, nrow = n)
+}
   ###############################
   ###############################
   ##### Formula 3  wx
@@ -451,7 +452,7 @@ Hx.fne <- cbind(x.ff, Wx.f, WWx.f, WWWx.f, instr.F)
     else colnames.end.V <- NULL
    }
    else{
-     Wx.V <- WWx.V <-  WWWx.V <- matrix(nrow = n, ncol = 0)
+     x.VV <- Wx.V <- WWx.V <-  WWWx.V <- matrix(nrow = n, ncol = 0)
      colnames.end.V <- paste(colnames.end.v, rep(1:sv, each = length(colnames.end.v)), sep = "_")
    }
 Hx.vne <- cbind(x.VV, Wx.V, WWx.V, WWWx.V, instr.VV)
@@ -568,4 +569,5 @@ spatial.ivreg.regimes <-function(y, Zmat, Hmat, het){
   result <- list(coefficients = delta, var = vardelta, residuals = e)
   return(result)
 }
+
 
