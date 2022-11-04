@@ -44,7 +44,7 @@ regimes <- function(formula, data, rgv = NULL,
 
 
   if(is.null(rgv)) stop("regimes variable not specified")
-  if(class(rgv) != "formula") stop("regimes variable has to be a formula")
+  if(!inherits(rgv, "formula")) stop("regimes variable has to be a formula")
 
   #Obtain arguments
   vc                <- match.arg(vc)

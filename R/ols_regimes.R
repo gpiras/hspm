@@ -187,7 +187,7 @@ ols.data.prep.regimes <- function(formula, data, rgv, listw,
 
   #define the split variable
   if(is.null(rgv)) stop("regimes variable not specified")
-  if(class(rgv) != "formula") stop("regimes variable has to be a formula")
+  if(!inherits(rgv, "formula")) stop("regimes variable has to be a formula")
 
   n                <- dim(data)[1]
   splitvar         <- as.matrix(lm(rgv, data, method="model.frame"))
