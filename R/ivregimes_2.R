@@ -288,9 +288,9 @@ print.summary.ivregimes <- function(x,
                                     digits = max(5, getOption("digits") - 3),
                                     ...)
 {
-  cat("        ------------------------------------------------------------\n")
+  cat("                ------------------------------------\n")
   cat("                          IV Regimes Model \n")
-  cat("        ------------------------------------------------------------\n")
+  cat("                ------------------------------------\n")
    cat("\nCall:\n")
    cat(paste(deparse(x[[2]]), sep = "\n", collapse = "\n"), "\n\n", sep = "")
 

@@ -57,46 +57,47 @@ intro <- ols.data.prep.regimes(formula, data = data, listw = listw, rgv = rgv,
                                weps_rg = weps_rg, model = "error")
 
 
-  y        <- as.matrix(intro[[1]])
-  Hmat     <- intro[[2]]
-  Zmat     <- intro[[3]]
+  y              <- as.matrix(intro[[1]])
+  Hmat           <- intro[[2]]
+  Zmat           <- intro[[3]]
   colnames.end   <- intro[[4]]
   colnames.instr <- intro[[5]]
-  l.split <- intro[[6]]
-  Ws <- intro[[7]]
-  n <- dim(Ws)[1]
-  sv <- l.split[[3]]
+  l.split        <- intro[[6]]
+  Ws             <- intro[[7]]
+  n              <- dim(Ws)[1]
+  sv             <- l.split[[3]]
+  nameswx        <- intro[[8]]
 
-f.step <- spatial.ivreg.regimes(as.matrix(y), as.matrix(Zmat), as.matrix(Hmat), het)
-ubase <- f.step[[3]]
+  f.step <- spatial.ivreg.regimes(as.matrix(y), as.matrix(Zmat), as.matrix(Hmat), het)
+  ubase  <- f.step[[3]]
 
 ### initial values for optimization
-pars <- in.val(weps_rg = weps_rg, initial.value = initial.value,
+  pars <- in.val(weps_rg = weps_rg, initial.value = initial.value,
                Ws = Ws, ubase = ubase, sv = l.split[[3]])
 
 ##error part
-rhotilde <- error_part_regime(pars = pars, l.split = l.split,
+  rhotilde <- error_part_regime(pars = pars, l.split = l.split,
                               Ws = Ws, het = het,
                               ubase = ubase, n = n, weps_rg = weps_rg,
                               verbose = verbose, control = control)
-#print(rhotilde)
-out <- co_transform(rhotilde = rhotilde, y = y,
+
+ out     <- co_transform(rhotilde = rhotilde, y = y,
                     Zmat = Zmat, Hmat = Hmat,
                     l.split = l.split, Ws = Ws, het = het)
 
-delta <- out[[1]]
-utildeb <- out[[2]]
+ delta   <- out[[1]]
+ utildeb <- out[[2]]
 
 #print(delta)
 #print(utildeb)
-pippo <- error_efficient_regime(Ws = Ws, utildeb = utildeb,
+ pippo   <- error_efficient_regime(Ws = Ws, utildeb = utildeb,
                                 n = n, weps_rg = weps_rg,
                                 l.split = l.split, rhotilde = rhotilde,
                                 Hmat = Hmat, Zmat = Zmat,
                                 control = control, het = het,
                                 verbose = verbose, delta = delta)
 
-res <- list(pippo, cl, colnames.end,  colnames.instr)
+ res    <- list(pippo, cl, colnames.end,  colnames.instr, nameswx)
 #print(res)
 class(res) <- "error_regimes"
 return(res)
@@ -171,10 +172,11 @@ print.summary.error_regimes <- function(x,
                                       ...)
 {
   if(!is.null(unlist(x[[3]]))){
-    cat("        ------------------------------------------------------------\n")
-    cat("                         Spatial Error Regimes Model      \n")
-    cat("                      and additional endogenous variables               \n")
-    cat("        ------------------------------------------------------------\n")
+    if(is.null(x[[4]])){
+    cat("        --------------------------------------------\n")
+    cat("                 Spatial Error Regimes Model      \n")
+    cat("             and additional endogenous variables               \n")
+    cat("        ---------------------------------------------\n")
     cat("\nCall:\n")
     cat(paste(deparse(x[[2]]), sep = "\n", collapse = "\n"), "\n\n", sep = "")
 
@@ -189,19 +191,55 @@ print.summary.error_regimes <- function(x,
     cat("\nInstruments:\n")
 
     cat(paste(x[[4]], sep=" "))
+    }
+    else{
+      cat("             --------------------------------------------\n")
+      cat("                      Spatial Error Regimes Model \n")
+      cat("                   with spatially lagged regressors \n")
+      cat("                  and additional endogenous variables \n")
+      cat("             --------------------------------------------\n")
+      cat("\nCall:\n")
+      cat(paste(deparse(x[[2]]), sep = "\n", collapse = "\n"), "\n\n", sep = "")
+
+      cat("\nCoefficients:\n")
+      printCoefmat(x$CoefTable, digits = digits, P.values = TRUE, has.Pvalue = TRUE)
+
+
+      cat("\nEndogenous variables:\n")
+
+      cat(paste(unlist(x[[3]]), sep=" "))
+
+      cat("\nInstruments:\n")
+
+      cat(paste(x[[4]], sep=" "))
+
+    }
   }
 
   else{
-    cat("        ------------------------------------------------------------\n")
-    cat("                       Spatial Error Regimes Model       \n")
-    cat("        ------------------------------------------------------------\n")
+    if(is.null(x[[4]])){
+
+    cat("               -----------------------------------\n")
+    cat("                   Spatial Error Regimes Model       \n")
+    cat("               -----------------------------------\n")
     cat("\nCall:\n")
     cat(paste(deparse(x[[2]]), sep = "\n", collapse = "\n"), "\n\n", sep = "")
 
     cat("\nCoefficients:\n")
     printCoefmat(x$CoefTable, digits = digits, P.values = TRUE, has.Pvalue = TRUE)
+    }
+    else{
+      cat("                 ----------------------------------------\n")
+      cat("                       Spatial Error Regimes Model        \n")
+      cat("                     with spatially lagged regressors        \n")
+      cat("                 ----------------------------------------\n")
+      cat("\nCall:\n")
+      cat(paste(deparse(x[[2]]), sep = "\n", collapse = "\n"), "\n\n", sep = "")
 
+      cat("\nCoefficients:\n")
+      printCoefmat(x$CoefTable, digits = digits, P.values = TRUE, has.Pvalue = TRUE)
 
+    }
   }
 
 

@@ -56,9 +56,9 @@ lag_regimes <- function(formula, data, listw, rgv,
   colnames.end<- intro[[4]]
   colnames.instr <- intro[[5]]
   colinstr <- intro[[8]]
-
+  nameswx  <- intro[[9]]
   res <- spatial.ivreg.regimes(as.matrix(y), as.matrix(Zmat), as.matrix(Hmat), het)
-  res <- list(res, cl, colnames.end,  colnames.instr, colinstr)
+  res <- list(res, cl, colnames.end,  colnames.instr, colinstr, nameswx)
   class(res) <- "lag_regimes"
   return(res)
 
@@ -131,6 +131,8 @@ print.summary.lag_regimes <- function(x,
                                     ...)
 {
   if(is.null(x[[5]])){
+
+    if(is.null(x[[6]])){
   cat("        ------------------------------------------------------------\n")
   cat("                          Spatial Lag Regimes Model \n")
   cat("        ------------------------------------------------------------\n")
@@ -147,9 +149,31 @@ print.summary.lag_regimes <- function(x,
   cat("\nInstruments:\n")
 
   cat(paste(x[[4]], sep=" "))
+    }
+    else{
+
+      cat("        ------------------------------------------------------------\n")
+      cat("                          Spatial Durbin Regimes Model \n")
+      cat("        ------------------------------------------------------------\n")
+      cat("\nCall:\n")
+      cat(paste(deparse(x[[2]]), sep = "\n", collapse = "\n"), "\n\n", sep = "")
+
+      cat("\nCoefficients:\n")
+      printCoefmat(x$CoefTable, digits = digits, P.values = TRUE, has.Pvalue = TRUE)
+
+      cat("\nEndogenous variables:\n")
+
+      cat(paste(unlist(x[[3]]), sep=" "))
+
+      cat("\nInstruments:\n")
+
+      cat(paste(x[[4]], sep=" "))
+    }
 
   }
   else{
+
+    if(is.null(x[[6]])){
     cat("        ------------------------------------------------------------\n")
     cat("                          Spatial Lag Regimes Model \n")
     cat("                     with additional endogenous variables \n")
@@ -167,6 +191,26 @@ print.summary.lag_regimes <- function(x,
     cat("\nInstruments:\n")
 
     cat(paste(x[[4]], sep=" "))
+    }
+    else{
+      cat("        ------------------------------------------------------------\n")
+      cat("                          Spatial Durbin Regimes Model \n")
+      cat("                     with additional endogenous variables \n")
+      cat("        ------------------------------------------------------------\n")
+      cat("\nCall:\n")
+      cat(paste(deparse(x[[2]]), sep = "\n", collapse = "\n"), "\n\n", sep = "")
+
+      cat("\nCoefficients:\n")
+      printCoefmat(x$CoefTable, digits = digits, P.values = TRUE, has.Pvalue = TRUE)
+
+      cat("\nEndogenous variables:\n")
+
+      cat(paste(unlist(x[[3]]), sep=" "))
+
+      cat("\nInstruments:\n")
+
+      cat(paste(x[[4]], sep=" "))
+    }
 
   }
   invisible(x)
@@ -264,10 +308,12 @@ else{
   # variables for Durbin
 
   wx <- model.matrix(F1, data = mf, rhs = 3, drop = FALSE)
-
-  if(any(colnames(wx) == "(Intercept)")) wx <- wx[,-which(colnames(wx) == "(Intercept)")]
-  wx <- as.matrix(wx)
   nameswx <-  colnames(wx)
+
+  if(any(nameswx == "(Intercept)")) wx <- wx[,-which(colnames(wx) == "(Intercept)")]
+  if(any(nameswx == "(Intercept)")) nameswx <- nameswx[-(which(nameswx == "(Intercept)"))]
+  wx <- as.matrix(wx)
+  colnames(wx) <- nameswx
 
 #check if Durbin are fixed or variable
   xfd  <- wx[,(nameswx %in% namesxf), drop = FALSE]
@@ -520,12 +566,11 @@ if(dim(whv)[2] != 0){
 colinstr <- c(nameInst, nameswhf, nameswhv)
 
 
-  if(length(colinstr) < length(c(colnames.end.f, colnames.end.V, col.end.f.l, colnames.end.vl)))
+if(!is.null(colinstr)) {
+
+    if(length(colinstr) < length(c(colnames.end.f, colnames.end.V, col.end.f.l, colnames.end.vl)))
     stop("Not enough instruments specified: the model is not identified")
 
-
-
-if(!is.null(colinstr)) {
   if(!is.null(namesd)) colinst <- c("X", "WX","WWX", "WWWX", colinstr)
   else colinst <- c("X", "WX","WWX",  colinstr)
 }
@@ -535,7 +580,7 @@ if(!is.null(colinstr)) {
     }
 
  ret <- list(y = y, Hmat = Hmat, Zmat = Zmat, endog = list(colnames(wy), colnames.end.f, colnames.end.V, col.end.f.l, colnames.end.vl),
-              instrum = colinst, l.split = l.split, ws = Ws, colinstr = colinstr)
+              instrum = colinst, l.split = l.split, ws = Ws, colinstr = colinstr, nameswx = nameswx)
   return(ret)
 }
 

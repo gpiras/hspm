@@ -59,7 +59,7 @@ ols_regimes <- function(formula, data, listw, rgv,
   y        <- intro[[1]]
   Hmat     <- intro[[2]]
   Zmat     <- intro[[3]]
-  colnames.end<- intro[[4]]
+  colnames.end   <- intro[[4]]
   colnames.instr <- intro[[5]]
 
 
@@ -142,7 +142,7 @@ print.summary.ols_regimes <- function(x,
   if(!is.null(unlist(x[[3]]))){
   cat("        ------------------------------------------------------------\n")
   cat("                Regimes Model with spatially lagged regressors      \n")
-  cat("                  and additional endogenous variables               \n")
+  cat("                     and additional endogenous variables               \n")
   cat("        ------------------------------------------------------------\n")
   cat("\nCall:\n")
   cat(paste(deparse(x[[2]]), sep = "\n", collapse = "\n"), "\n\n", sep = "")
@@ -474,7 +474,7 @@ else   colinst <- c("X", "WX", nameInst, nameswhf, nameswhv)
     colinst <-  NULL
   }
   ret <- list(y = y, Hmat = Hmat, Zmat = Zmat, endog = endog,
-              instrum = colinst, l.split = l.split, Ws = Ws)
+              instrum = colinst, l.split = l.split, Ws = Ws, nameswx)
   return(ret)
 }
 
