@@ -7,7 +7,7 @@
 \alias{print.ols_regimes}
 \alias{summary.ols_regimes}
 \alias{print.summary.ols_regimes}
-\title{Estimation of spatial regime models}
+\title{Estimation of spatial regimes models}
 \usage{
 ols_regimes(formula, data, listw, rgv, het, cl)
 
@@ -42,8 +42,11 @@ ols_regimes(formula, data, listw, rgv, het, cl)
 
 \item{digits}{number of digits}
 }
+\value{
+An object of class \code{"ols_regimes"}. A \code{list} of four elements. The first element of the \code{list} contains the estimation results. The other elements are needed for printing.
+}
 \description{
-Estimation of spatial regime models
+Estimation of spatial regimes models
 }
 \examples{
 data("natreg")

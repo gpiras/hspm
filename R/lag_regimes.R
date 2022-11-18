@@ -1,5 +1,5 @@
 ##### Functions for spatial lag regimes model####
-#' Estimation of spatial regime models
+#' Estimation of spatial regimes models
 #' @name lag_regimes
 #' @param formula a symbolic description of the model of the form \code{y ~ x_f | x_v | wx | h_f | h_v | wh} where \code{y} is the dependent variable, \code{x_f} are the regressors that do not vary by regimes,  \code{x_v} are the regressors that vary by regimes, \code{wx} are the spatially lagged regressors, \code{h_f} are the instruments that do not vary by regimes,  \code{h_v} are the instruments that vary by regimes, \code{wh} are the spatially lagged instruments.
 #' @param data the data of class \code{data.frame}.
@@ -12,6 +12,8 @@
 #' @param ... additional arguments
 #' @param x an object of class lag_regime
 #' @param digits number of digits
+#'
+#' @return an object of class \code{"lag_regimes"}. A \code{list} with six elements. The first element of the \code{list} contains the estimation results. The other elements are needed for printing.
 
 #' @examples
 #' data("natreg")

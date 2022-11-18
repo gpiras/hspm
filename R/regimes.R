@@ -2,7 +2,7 @@
 
 
 ##### Functions for regimes ####
-#' @title Estimation of spatial regime models
+#' @title Estimation of spatial regimes models
 #' @name regimes
 #' @param formula a symbolic description of the model of the form \code{y ~ x_f | x_v} where \code{y} is the dependent variable, \code{x_f} are the regressors that do not vary by regimes and  \code{x_v} are the regressors that vary by regimes
 #' @param data the data of class \code{data.frame}.

@@ -7,7 +7,7 @@
 \alias{print.lag_regimes}
 \alias{summary.lag_regimes}
 \alias{print.summary.lag_regimes}
-\title{Estimation of spatial regime models}
+\title{Estimation of spatial regimes models}
 \usage{
 lag_regimes(formula, data, listw, rgv, het, cl, wy_rg)
 
@@ -44,8 +44,11 @@ lag_regimes(formula, data, listw, rgv, het, cl, wy_rg)
 
 \item{digits}{number of digits}
 }
+\value{
+an object of class \code{"lag_regimes"}. A \code{list} with six elements. The first element of the \code{list} contains the estimation results. The other elements are needed for printing.
+}
 \description{
-Estimation of spatial regime models
+Estimation of spatial regimes models
 }
 \examples{
 data("natreg")

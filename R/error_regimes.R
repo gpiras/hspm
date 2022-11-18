@@ -1,5 +1,5 @@
 ##### Functions for linear model with error dependence and regimes####
-#' Estimation of spatial regime models
+#' Estimation of spatial regimes models
 #' @name error_regimes
 #' @param formula a symbolic description of the model of the form \code{y ~ x_f | x_v | wx | h_f | h_v | wh} where \code{y} is the dependent variable, \code{x_f} are the regressors that do not vary by regimes,  \code{x_v} are the regressors that vary by regimes, \code{wx} are the spatially lagged regressors, \code{h_f} are the instruments that do not vary by regimes,  \code{h_v} are the instruments that vary by regimes, \code{wh} are the spatially lagged instruments.
 #' @param data the data of class \code{data.frame}.
@@ -16,7 +16,7 @@
 #' @param x an object of class error_regimes
 #' @param digits number of digits
 #'
-#'
+#' @return An object of class \code{"error_regimes"}. A \code{list} of five elements. The first element of the \code{list} contains the estimation results. The other elements are needed for printing.
 #'
 #' @examples
 #' data("natreg")
@@ -44,9 +44,7 @@
 #' mod2 <- spregimes(formula = form1, data = natreg,
 #' rgv = split, listw = ws_6, model = "error", het = TRUE)
 #' summary(mod2)
-#' \dontrun{mod3 <- spregimes(formula = form1, data = natreg,
-#' rgv = split, listw = ws_6, model = "error", weps_rg = TRUE, het = TRUE)
-#' summary(mod3)}
+
 error_regimes <- function(formula, data, listw,  rgv, weps_rg = FALSE,
                           initial.value  = NULL, het, verbose = FALSE, control, cl){
 

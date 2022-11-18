@@ -7,7 +7,7 @@
 \alias{print.regimes}
 \alias{summary.regimes}
 \alias{print.summary.regimes}
-\title{Estimation of spatial regime models}
+\title{Estimation of spatial regimes models}
 \usage{
 regimes(formula, data, rgv = NULL, vc = c("homoskedastic", "groupwise"))
 
@@ -42,7 +42,7 @@ regimes(formula, data, rgv = NULL, vc = c("homoskedastic", "groupwise"))
 An object of class \code{lm} and \code{regimes}. If \code{vc = "groupwise"} the model is estimated in two steps and the second steps uses weighted least squares.
 }
 \description{
-Estimation of spatial regime models
+Estimation of spatial regimes models
 }
 \details{
 The model estimated is:

@@ -7,9 +7,9 @@
 \alias{print.ivregimes}
 \alias{summary.ivregimes}
 \alias{print.summary.ivregimes}
-\title{Estimation of spatial regime models with endogenous variables}
+\title{Estimation of spatial regimes}
 \usage{
-ivregimes(formula, data, rgv = NULL, vc = c("classical", "robust", "OGMM"))
+ivregimes(formula, data, rgv = NULL, vc = c("homoskedastic", "robust", "OGMM"))
 
 \method{coef}{ivregimes}(object, ...)
 
@@ -28,7 +28,7 @@ ivregimes(formula, data, rgv = NULL, vc = c("classical", "robust", "OGMM"))
 
 \item{rgv}{an object of class \code{formula} to identify the regime variables}
 
-\item{vc}{one of \code{c('classical', 'robust', 'OGMM')}. If \code{OGMM} an optimal weighted GMM is used to estimate the VC matrix (for additional details see Anselin and Rey, 2014).}
+\item{vc}{one of \code{c("homoskedastic", "robust", "OGMM")}. If \code{"OGMM"} an optimal weighted GMM is used to estimate the VC matrix.}
 
 \item{object}{an object of class ivregime}
 
@@ -39,10 +39,10 @@ ivregimes(formula, data, rgv = NULL, vc = c("classical", "robust", "OGMM"))
 \item{digits}{number of digits}
 }
 \value{
-An object of class \code{ivregimes}
+An object of class \code{ivregimes}. A \code{list} of five elements. The first element of the list contains the estimation results. The other elements are needed for printing the results.
 }
 \description{
-Estimation of spatial regime models with endogenous variables
+Estimation of spatial regimes
 }
 \details{
 The model estimated is:
@@ -62,7 +62,7 @@ summary(mod)
 mod1 <- ivregimes(formula = form, data = natreg, rgv = split, vc = "OGMM")
 summary(mod1)
 form1   <- HR90  ~ MA90 + PS90 |  RD90 + UE90 -1 | MA90 + PS90 | RD90 + FH90 + FP89 + GI89 -1
-mod2 <- ivregimes(formula = form1, data = natreg, rgv = split, vc = "classical")
+mod2 <- ivregimes(formula = form1, data = natreg, rgv = split, vc = "homoskedastic")
 summary(mod2)
 
 }

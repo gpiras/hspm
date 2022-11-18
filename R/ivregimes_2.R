@@ -1,12 +1,12 @@
 
 
 ##### Functions for regimes ####
-#' @title Estimation of spatial regime models with endogenous variables
+#' @title Estimation of spatial regimes
 #' @name ivregimes
 #' @param formula a symbolic description of the model of the form \code{y ~ x_f | x_v | h_f | h_v} where \code{y} is the dependent variable, \code{x_f} are the regressors that do not vary by regimes,  \code{x_v} are the regressors that vary by regimes, \code{h_f} are the fixed instruments and \code{h_v} are the instruments that vary by regimes.
 #' @param data the data of class \code{data.frame}.
 #' @param rgv an object of class \code{formula} to identify the regime variables
-#' @param vc   one of \code{c('classical', 'robust', 'OGMM')}. If \code{OGMM} an optimal weighted GMM is used to estimate the VC matrix (for additional details see Anselin and Rey, 2014).
+#' @param vc   one of \code{c("homoskedastic", "robust", "OGMM")}. If \code{"OGMM"} an optimal weighted GMM is used to estimate the VC matrix.
 #' @param object an object of class ivregime
 #' @param ... additional arguments
 #' @param x an object of class ivregime
@@ -32,16 +32,16 @@
 #' mod1 <- ivregimes(formula = form, data = natreg, rgv = split, vc = "OGMM")
 #' summary(mod1)
 #' form1   <- HR90  ~ MA90 + PS90 |  RD90 + UE90 -1 | MA90 + PS90 | RD90 + FH90 + FP89 + GI89 -1
-#' mod2 <- ivregimes(formula = form1, data = natreg, rgv = split, vc = "classical")
+#' mod2 <- ivregimes(formula = form1, data = natreg, rgv = split, vc = "homoskedastic")
 #' summary(mod2)
 #'
 #' @author Gianfranco Piras and Mauricio Sarrias
-#' @return An object of class \code{ivregimes}
+#' @return An object of class \code{ivregimes}. A \code{list} of five elements. The first element of the list contains the estimation results. The other elements are needed for printing the results.
 #' @import Formula sphet stats
 #' @export
 
 ivregimes <- function(formula, data, rgv = NULL,
-                      vc = c("classical", "robust", "OGMM")){
+                      vc = c("homoskedastic", "robust", "OGMM")){
 
   cl <- match.call()
 
@@ -91,7 +91,7 @@ tsls_regimes <- function(y, Hmat, Zmat, vc){
 
 
   ##simple
-  if(vc =="classical"){
+  if(vc == "homoskedastic"){
 
     cpe <- crossprod(e)
     vcmatrix <- (as.numeric(cpe) /df) * solve(crossprod(Zp))

@@ -7,7 +7,7 @@
 \alias{print.error_regimes}
 \alias{summary.error_regimes}
 \alias{print.summary.error_regimes}
-\title{Estimation of spatial regime models}
+\title{Estimation of spatial regimes models}
 \usage{
 error_regimes(
   formula,
@@ -61,8 +61,11 @@ error_regimes(
 
 \item{digits}{number of digits}
 }
+\value{
+An object of class \code{"error_regimes"}. A \code{list} of five elements. The first element of the \code{list} contains the estimation results. The other elements are needed for printing.
+}
 \description{
-Estimation of spatial regime models
+Estimation of spatial regimes models
 }
 \examples{
 data("natreg")
@@ -90,7 +93,4 @@ summary(mod1)
 mod2 <- spregimes(formula = form1, data = natreg,
 rgv = split, listw = ws_6, model = "error", het = TRUE)
 summary(mod2)
-\dontrun{mod3 <- spregimes(formula = form1, data = natreg,
-rgv = split, listw = ws_6, model = "error", weps_rg = TRUE, het = TRUE)
-summary(mod3)}
 }

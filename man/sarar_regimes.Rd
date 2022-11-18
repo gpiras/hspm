@@ -7,7 +7,7 @@
 \alias{print.sarar_regimes}
 \alias{summary.sarar_regimes}
 \alias{print.summary.sarar_regimes}
-\title{Estimation of spatial regime models}
+\title{Estimation of spatial regimes models}
 \usage{
 sarar_regimes(
   formula,
@@ -64,8 +64,11 @@ sarar_regimes(
 
 \item{digits}{number of digits}
 }
+\value{
+An object of class \code{"sarar_regimes"}. A \code{list} of five elements. The first element of the \code{list} contains the estimation results. The other elements are needed for printing.
+}
 \description{
-Estimation of spatial regime models
+Estimation of spatial regimes models
 }
 \examples{
 data("natreg")
