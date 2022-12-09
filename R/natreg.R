@@ -1,8 +1,8 @@
-#' US Counties Homicides
+#' US Counties Homicides data
 #'
 #' Continental U.S. counties data for homicides and selected socio-economic characteristics. Data for four decennial census years: 1960, 1970, 1980 and 1990.
 #'
-#' @format A data frame with 3085 rows and 70 variables
+#' @format A data frame with 3085 rows and 73 variables
 #' \describe{
 #' \item{REGIONS}{Regions of the US}
 #' \item{NOSOUTH}{Counties not in the south}
@@ -77,10 +77,6 @@
 #' \item{FH80}{pct. female headed households in 1980}
 #' \item{FH90}{pct. female headed households in 1990}
 #' \item{West}{West regional dummy}
-
-#'
-#'
-#' ...
 #' }
 #' @source \url{https://geodacenter.github.io/data-and-lab/}
 "natreg"

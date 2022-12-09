@@ -1,21 +1,39 @@
-##### Functions for spatial regimes ####
 #' @title Estimation of spatial regimes models
+#' @description The function \code{spregimes} deals with the estimation of spatial regime models.
+#' This is a general function that allows the estimation
+#' of various spatial specifications, including the spatial lag regime model,
+#' the spatial error regime model, and the spatial SARAR regime model.
+#' Since the estimation is based on generalized method of moments (GMM),
+#' endogenous variables can be included of the model. For further information on estimation, see details.
 #' @name spregimes
-#' @param formula a symbolic description of the model of the form \code{y ~ x_f | x_v | wx | h_f | h_v | wh}; where \code{y} is the dependent variable, \code{x_f} are the regressors that do not vary by regimes,  \code{x_v} are the regressors that vary by regimes, \code{wx} are the spatially lagged regressors, \code{h_f} are the instruments that do not vary by regimes,  \code{h_v} are the instruments that vary by regimes, \code{wh} are the spatially lagged instruments.
+#' @param formula a symbolic description of the model of
+#' the form \code{y ~ x_f | x_v | wx | h_f | h_v | wh}
+#' where \code{y} is the dependent variable,
+#' \code{x_f} are the regressors that do not vary by regimes,
+#' \code{x_v} are the regressors that vary by regimes,
+#' \code{wx} are the spatially lagged regressors,
+#' \code{h_f} are the instruments that do not vary by regimes,
+#' \code{h_v} are the instruments that vary by regimes,
+#' \code{wh} are the spatially lagged instruments.
 #' @param data the data of class \code{data.frame}.
+#' @param model should be one of \code{c("sarar", "lag", "error", "ols")}
 #' @param listw a spatial weighting matrix of class \code{listw}, \code{matrix} or \code{Matrix}
-#' @param rgv an object of class \code{formula} to identify the regime variables
-#' @param initial.value initial value for the spatial error parameter
 #' @param wy_rg default \code{wy_rg = FALSE}, the lagged dependent variable does not vary by regime (see details)
-#' @param weps_rg default \code{weps_rg = FALSE}, the errors do not vary by regime (see details)
-#' @param model one of \code{model = c("sarar", "lag", "error", "ols")}
+#' @param weps_rg default \code{weps_rg = FALSE}, if \code{TRUE} the spatial error term varies by regimes (see details)
+#' @param initial.value initial value for the spatial error parameter
+#' @param rgv an object of class \code{formula} to identify the regime variables
 #' @param het heteroskedastic variance-covariance matrix
-#' @param control list of controls for the minimization
 #' @param verbose print a trace of the optimization
+#' @param control select arguments for the optimization
+#' @param object an object of class spregimes
+#' @param ... additional arguments
+#' @param x an object of class spregimes
+#' @param digits number of digits
 #'
 #' @examples
 #' data("natreg")
 #' data("ws_6")
+#'
 #' form <-  HR90  ~ 0 | MA90 + PS90 +
 #' RD90 + UE90 | 0 | 0 | MA90 + PS90 +
 #' RD90 + FH90 + FP89 + GI89 | 0
@@ -24,7 +42,37 @@
 #' RD90 + UE90 | 0 | MA90 -1 |  PS90 +
 #' RD90 + FH90 + FP89 + GI89 | 0
 #'
+#' form2 <-  HR90  ~ MA90 -1 |  PS90 +
+#' RD90 + UE90 | MA90 | MA90 -1 |  PS90 +
+#' RD90 + FH90 + FP89 + GI89 | 0
+#'
+#' form3 <-  HR90  ~ MA90 -1 |  PS90 +
+#' RD90 + UE90 | MA90 | MA90 -1 |  PS90 +
+#' RD90 + FH90 + FP89 + GI89 | GI89
+#'
+#' form4 <-  HR90  ~ MA90 -1 |  PS90 +
+#' RD90 + UE90 | MA90 + RD90 | MA90 -1 |  PS90 +
+#' RD90 + FH90 + FP89 + GI89 | GI89
+#'
+#'
 #' split  <- ~ REGIONS
+#'
+#' ###################################################
+#' # Linear model with regimes and lagged regressors #
+#' ###################################################
+
+#' mod <- spregimes(formula = form2, data = natreg,
+#' rgv = split, listw = ws_6, model = "ols")
+#' summary(mod)
+#'
+#' mod1 <- spregimes(formula = form3, data = natreg,
+#' rgv = split, listw = ws_6, model = "ols")
+#' summary(mod1)
+#'
+#' mod2 <- spregimes(formula = form4, data = natreg,
+#' rgv = split, listw = ws_6, model = "ols")
+#' summary(mod2)
+#'
 #'
 #' ###############################
 #' # Spatial Error regimes model #
@@ -92,21 +140,132 @@
 #'
 
 #' @details
-#' The general model contains the spatial lag of the dependent variable, the spatial lag of the regressors, the spatial lag of the errors and possibly additional endogenous variables.
-#' \code{spregimes} estimate all of the nested specifications of this general model.
-#' The regressors can be either "fixed" or varying by regime. However, if \code{weps_rg} is set to TRUE, all the regressors should vary by regime.
+#' The function \code{spregimes} is a wrapper that allows the
+#' estimation of a general
+#' spatial regime model.
+#' For convenience and without loss of generality,
+#' we assume the presence of only two regimes.
+#' In this case the general model can be written as:
+#' \deqn{
+#' \begin{aligned}
+#' y = &	W\begin{bmatrix}
+#' y_1& 0 \\
+#' 0 & y_2 \\
+#' \end{bmatrix}
+#' \begin{bmatrix}
+#' \lambda_1 \\
+#' \lambda_2 \\
+#' \end{bmatrix}
+#' +
+#'  \begin{bmatrix}
+#' X_1& 0 \\
+#' 0 & X_2 \\
+#' \end{bmatrix}
+#' \begin{bmatrix}
+#' \beta_1 \\
+#' \beta_2 \\
+#' \end{bmatrix}
+#' + X\beta +
+#' \begin{bmatrix}
+#' Y_1& 0 \\
+#' 0 & Y_2 \\
+#' \end{bmatrix}
+#' \begin{bmatrix}
+#' \pi_1 \\
+#' \pi_2 \\
+#' \end{bmatrix}
+#' + Y\pi +  \\
+#' &
+#' W\begin{bmatrix}
+#' X_1& 0 \\
+#' 0 & X_2 \\
+#' \end{bmatrix}
+#' \begin{bmatrix}
+#' \delta_1 \\
+#' \delta_2 \\
+#' \end{bmatrix}+ WX\delta+
+#'  W
+#' \begin{bmatrix}
+#' Y_1& 0 \\
+#' 0 & Y_2 \\
+#' \end{bmatrix}
+#' \begin{bmatrix}
+#' \theta_1 \\
+#' \theta_2 \\
+#' \end{bmatrix}
+#' + WY\theta
+#' +
+#' \begin{bmatrix}
+#' \varepsilon_1 \\
+#' \varepsilon_2 \\
+#' \end{bmatrix}
+#' \end{aligned}
+#' }
+#' where
+#' \deqn{
+#' \begin{bmatrix}
+#' \varepsilon_1 \\
+#' \varepsilon_2 \\
+#' \end{bmatrix}
+#' =W	\begin{bmatrix}
+#' \varepsilon_1&0 \\
+#' 0&\varepsilon_2 \\
+#' \end{bmatrix}
+#' \begin{bmatrix}
+#' \rho_1 \\
+#' \rho_2 \\
+#' \end{bmatrix}
+#' +u \nonumber
+#' }
+#' The model includes the spatial lag of the dependent variable,
+#' the spatial lag of the regressors,
+#' the spatial lag of the errors
+#' and, possibly, additional endogenous variables.
+#' The function
+#' \code{spregimes} estimates all of the nested
+#' specifications deriving from this model.
+#' There are, however, some restrictions.
+#' For example, if \code{weps_rg} is set to TRUE,
+#' all the regressors in the model should also vary by regime.
+#' The estimation of the different models relies heavily
+#' on code available from the package \pkg{sphet}.
+#'
+#'\enumerate{
+#' \item For the spatial lag (or Durbin) regime model (i.e, when \eqn{\rho_1}
+#' and \eqn{\rho_2} are zero), an instrumental variable
+#' procedure is adopted, where the matrix of instruments
+#' is formed by the spatial lags of the exogenous variables
+#' and the additional instruments included in the \code{formula}.
+#' A robust estimation
+#' of the variance-covariance matrix can be obtained
+#' by setting \code{het = TRUE}.
+#'
+#' \item For the spatial error regime model (i.e, when \eqn{\lambda_1}
+#' and \eqn{\lambda_2} are zero), the spatial
+#' coefficient(s)
+#' are estimated with the GMM procedure described
+#' in Kelejian and Prucha (2010) and Drukker et al., (2013).
+#' The difference between Kelejian and Prucha (2010) and Drukker et al., (2013),
+#' is that the former assumes heteroskedastic innovations (\code{het = TRUE}),
+#' while the latter does not (\code{het = FALSE}).
+#'
+#' \item For the SARAR regime model, the estimation procedure
+#' alternates a series of IV and GMM steps. The variance-covariance
+#' can be estimated assuming that the innovations are homoskedastic (\code{het = FALSE})
+#' as well as heteroskedastic (\code{het = TRUE}).
+#' }
 #'
 #' @author Gianfranco Piras and Mauricio Sarrias
-#' @return An object of class ``\code{lag_regimes}'', or \code{sarar_regimes}, or \code{error_regimes}
+#' @return An object of class ``\code{spregimes}''
 #' @import Formula sphet stats
 #' @rawNamespace import(Matrix,  except = c(cov2cor, toeplitz, update))
 #' @export
 
 
-spregimes <- function(formula, data = list(), listw, rgv = NULL,
-                      initial.value = NULL, verbose = FALSE, wy_rg = FALSE, weps_rg = FALSE,
-                      model = c("sarar", "lag", "error", "ols"), het = FALSE,
-                      control = list()){
+spregimes <- function(formula, data = list(), model = c("sarar", "lag", "error", "ols"),
+                      listw, wy_rg = FALSE, weps_rg = FALSE,
+                       initial.value = NULL, rgv = NULL,
+                      het = FALSE, verbose = FALSE, control = list()){
 
 
 
@@ -128,11 +287,5 @@ spregimes <- function(formula, data = list(), listw, rgv = NULL,
   )
 
 }
-
-
-
-
-
-
 
 

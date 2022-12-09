@@ -21,8 +21,6 @@
 #'   \item{SQFT}{interior living space in hundreds of square feet}
 #'   \item{X}{X coordinate on the Maryland grid}
 #'   \item{Y}{Y coordinate on the Maryland grid}
-#'
-#'   ...
 #' }
 #' @source \url{https://geodacenter.github.io/data-and-lab/}
 "baltim"

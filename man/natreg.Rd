@@ -3,9 +3,9 @@
 \docType{data}
 \name{natreg}
 \alias{natreg}
-\title{US Counties Homicides}
+\title{US Counties Homicides data}
 \format{
-A data frame with 3085 rows and 70 variables
+A data frame with 3085 rows and 73 variables
 \describe{
 \item{REGIONS}{Regions of the US}
 \item{NOSOUTH}{Counties not in the south}
@@ -80,9 +80,6 @@ A data frame with 3085 rows and 70 variables
 \item{FH80}{pct. female headed households in 1980}
 \item{FH90}{pct. female headed households in 1990}
 \item{West}{West regional dummy}
-
-
-...
 }
 }
 \source{

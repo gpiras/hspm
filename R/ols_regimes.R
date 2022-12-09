@@ -1,48 +1,3 @@
-##### Functions for linear model with lagged explanatory variables####
-#' Estimation of spatial regimes models
-#' @name ols_regimes
-#' @param formula a symbolic description of the model of the form \code{y ~ x_f | x_v | wx | h_f | h_v | wh} where \code{y} is the dependent variable, \code{x_f} are the regressors that do not vary by regimes,  \code{x_v} are the regressors that vary by regimes, \code{wx} are the spatially lagged regressors, \code{h_f} are the instruments that do not vary by regimes,  \code{h_v} are the instruments that vary by regimes, \code{wh} are the spatially lagged instruments.
-#' @param data the data of class \code{data.frame}.
-#' @param listw a spatial weighting matrix of class \code{listw}, \code{matrix} or \code{Matrix}
-#' @param rgv an object of class \code{formula} to identify the regime variables
-#' @param het heteroskedastic variance-covariance matrix
-#' @param cl record calls
-#' @param object an object of class ols_regimes
-#' @param ... additional arguments
-#' @param x an object of class ols_regimes
-#' @param digits number of digits
-#' @return An object of class \code{"ols_regimes"}. A \code{list} of four elements. The first element of the \code{list} contains the estimation results. The other elements are needed for printing.
-#'
-#' @examples
-#' data("natreg")
-#' data("ws_6")
-#'
-#' split  <- ~ REGIONS
-#'
-#' form <-  HR90  ~ MA90 -1 |  PS90 +
-#' RD90 + UE90 | MA90 | MA90 -1 |  PS90 +
-#' RD90 + FH90 + FP89 + GI89 | 0
-#'
-#' form1 <-  HR90  ~ MA90 -1 |  PS90 +
-#' RD90 + UE90 | MA90 | MA90 -1 |  PS90 +
-#' RD90 + FH90 + FP89 + GI89 | GI89
-#'
-#' form2 <-  HR90  ~ MA90 -1 |  PS90 +
-#' RD90 + UE90 | MA90 + RD90 | MA90 -1 |  PS90 +
-#' RD90 + FH90 + FP89 + GI89 | GI89
-#'
-#' mod <- spregimes(formula = form, data = natreg,
-#' rgv = split, listw = ws_6, model = "ols")
-#' summary(mod)
-#'
-#' mod1 <- spregimes(formula = form1, data = natreg,
-#' rgv = split, listw = ws_6, model = "ols")
-#' summary(mod1)
-#'
-#' mod2 <- spregimes(formula = form2, data = natreg,
-#' rgv = split, listw = ws_6, model = "ols")
-#' summary(mod2)
-
 
 
 
@@ -66,119 +21,12 @@ ols_regimes <- function(formula, data, listw, rgv,
 
   res <- spatial.ivreg.regimes(as.matrix(y), as.matrix(Zmat), as.matrix(Hmat), het)
   res <- list(res, cl, colnames.end,  colnames.instr)
-  class(res) <- "ols_regimes"
+  class(res) <- c("spregimes", "ols_regimes")
 
 
   return(res)
 
 }
-
-### S3 methods ----
-
-#' @rdname ols_regimes
-#' @method coef ols_regimes
-#' @export
-coef.ols_regimes <- function(object, ...){
-  object[[1]][[1]]
-}
-
-
-#' @rdname ols_regimes
-#' @method vcov ols_regimes
-#' @import stats
-#' @export
-vcov.ols_regimes <- function(object, ...){
-  V <- object[[1]][[2]]
-  return(V)
-}
-
-
-#' @rdname ols_regimes
-#' @method print ols_regimes
-#' @import stats
-#' @export
-print.ols_regimes <- function(x,
-                              digits = max(3, getOption("digits") - 3),
-                              ...)
-{
-  cat("Call:\n")
-  print(x[[2]])
-
-  cat("\nCoefficients:\n")
-
-  print.default(format(drop(coef(x)), digits = digits), print.gap = 2,
-                quote = FALSE)
-  cat("\n")
-  invisible(x)
-}
-
-
-
-#' @rdname ols_regimes
-#' @method summary ols_regimes
-#' @import stats
-#' @export
-summary.ols_regimes <- function(object, ...){
-  b                   <- coef(object)
-  std.err             <- sqrt(diag(vcov(object)))
-  z                   <- b / std.err
-  p                   <- 2 * (1 - pnorm(abs(z)))
-  CoefTable           <- cbind(b, std.err, z, p)
-  colnames(CoefTable) <- c("Estimate", "Std. Error", "z-value", "Pr(>|z|)")
-  object$CoefTable    <- CoefTable
-  class(object)       <- c("summary.ols_regimes", "ols_regimes")
-  return(object)
-}
-
-
-#' @rdname ols_regimes
-#' @method print summary.ols_regimes
-#' @import stats
-#' @export
-print.summary.ols_regimes <- function(x,
-                                      digits = max(5, getOption("digits") - 3),
-                                      ...)
-{
-  if(!is.null(unlist(x[[3]]))){
-  cat("        ------------------------------------------------------------\n")
-  cat("                Regimes Model with spatially lagged regressors      \n")
-  cat("                     and additional endogenous variables               \n")
-  cat("        ------------------------------------------------------------\n")
-  cat("\nCall:\n")
-  cat(paste(deparse(x[[2]]), sep = "\n", collapse = "\n"), "\n\n", sep = "")
-
-  cat("\nCoefficients:\n")
-  printCoefmat(x$CoefTable, digits = digits, P.values = TRUE, has.Pvalue = TRUE)
-
-
-  cat("\nEndogenous variables:\n")
-
-  cat(paste(unlist(x[[3]]), sep=" "))
-
-  cat("\nInstruments:\n")
-
-  cat(paste(x[[4]], sep=" "))
-  }
-
-  else{
-    cat("        ------------------------------------------------------------\n")
-    cat("                Regimes Model with spatially lagged regressors      \n")
-    cat("        ------------------------------------------------------------\n")
-    cat("\nCall:\n")
-    cat(paste(deparse(x[[2]]), sep = "\n", collapse = "\n"), "\n\n", sep = "")
-
-    cat("\nCoefficients:\n")
-    printCoefmat(x$CoefTable, digits = digits, P.values = TRUE, has.Pvalue = TRUE)
-
-
-  }
-
-
-  invisible(x)
-}
-
-
-
 
 
 ols.data.prep.regimes <- function(formula, data, rgv, listw,

@@ -3,7 +3,7 @@
 \docType{data}
 \name{ws_6}
 \alias{ws_6}
-\title{US Counties Homicides}
+\title{Spatial weighting matrix for the US Counties Homicides data}
 \format{
 A spatial weighting matrix of class \code{Matrix}
 }
@@ -14,6 +14,6 @@ A spatial weighting matrix of class \code{Matrix}
 ws_6
 }
 \description{
-Continental U.S. counties data for homicides and selected socio-economic characteristics. Data for four decennial census years: 1960, 1970, 1980 and 1990.
+ws_6 is a spatial weights matrix based on the 6 nearest neighbors for the Continental U.S. counties data for homicides
 }
 \keyword{datasets}

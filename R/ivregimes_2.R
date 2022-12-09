@@ -1,27 +1,83 @@
-
-
 ##### Functions for regimes ####
-#' @title Estimation of spatial regimes
+#' @title Estimation of regime models with endogenous variables
+#' @description The function \code{ivregimes} deals with
+#' the estimation of regime models.
+#' Most of the times the variable identifying the regimes
+#' reveals some spatial aspects of the data (e.g., administrative boundaries).
+#' The model includes exogenous as well as endogenous
+#' variables among the regressors.
+
 #' @name ivregimes
 #' @param formula a symbolic description of the model of the form \code{y ~ x_f | x_v | h_f | h_v} where \code{y} is the dependent variable, \code{x_f} are the regressors that do not vary by regimes,  \code{x_v} are the regressors that vary by regimes, \code{h_f} are the fixed instruments and \code{h_v} are the instruments that vary by regimes.
 #' @param data the data of class \code{data.frame}.
 #' @param rgv an object of class \code{formula} to identify the regime variables
 #' @param vc   one of \code{c("homoskedastic", "robust", "OGMM")}. If \code{"OGMM"} an optimal weighted GMM is used to estimate the VC matrix.
-#' @param object an object of class ivregime
-#' @param ... additional arguments
-#' @param x an object of class ivregime
-#' @param digits number of digits
 #'
 #'
 #' @details
 #'
-#' The model estimated is:
-#'
-#' \deqn{
-#' y_{ij}= \mathbf{x_{ij,k}}\beta_j + \mathbf{Y_{ij,k}}\gamma_j + \epsilon
+#' The basic (non spatial) model with endogenous variables
+#' can be written in a general way as:
+#'  \deqn{
+#' y
+#' =
+#' \begin{bmatrix}
+#' X_1& 0 \\
+#' 0 & X_2 \\
+#' \end{bmatrix}
+#' \begin{bmatrix}
+#' \beta_1 \\
+#' \beta_2 \\
+#' \end{bmatrix}
+#' + X\beta +
+#' \begin{bmatrix}
+#' Y_1& 0 \\
+#' 0 & Y_2 \\
+#' \end{bmatrix}
+#' \begin{bmatrix}
+#' \pi_1 \\
+#' \pi_2 \\
+#' \end{bmatrix}
+#' + Y\pi +
+#'  \varepsilon
 #' }
-#' for i=1,..,n representing the sample observations, and j = 1,..., J representing
-#' the  regimes
+#' where  \eqn{y = [y_1^\prime,y_2^\prime]^\prime},
+#' and the \eqn{n_1 \times 1} vector \eqn{y_1} contains the observations
+#' on the dependent variable for the first regime,
+#' and the \eqn{n_2 \times 1} vector \eqn{y_2} (with \eqn{n_1 + n_2 = n})
+#' contains the observations on the dependent variable for the second regime.
+#' The \eqn{n_1 \times k} matrix \eqn{X_1} and the \eqn{n_2 \times k}
+#' matrix \eqn{X_2} are blocks of a block diagonal matrix,
+#' the vectors of parameters  \eqn{\beta_1} and \eqn{\beta_2} have
+#' dimension \eqn{k_1 \times 1} and \eqn{k_2 \times 1}, respectively,
+#' \eqn{X} is the \eqn{n \times p} matrix of regressors that do not vary by regime,
+#' \eqn{\beta}  is a \eqn{p\times 1} vector of parameters.
+#' The three matrices \eqn{Y_1} (\eqn{n_1 \times q}),
+#' \eqn{Y_2} (\eqn{n_2 \times q}) and \eqn{Y} (\eqn{n \times r})
+#' with corresponding vectors of parameters \eqn{\pi_1}, \eqn{\pi_2} and \eqn{\pi},
+#' contain the endogenous variables.
+#' Finally, \eqn{\varepsilon = [\varepsilon_1^\prime,\varepsilon_2^\prime]^\prime}
+#' is the \eqn{n\times 1} vector of innovations.
+#' The model is estimated by two stage least square.
+#' In particular:
+#' \itemize{
+#' \item If \code{vc = "homoskedastic"},
+#' the variance-covariance matrix is estimated by \eqn{\sigma^2(\hat Z^\prime \hat Z)^{-1}},
+#' where \eqn{\hat Z= PZ},  \eqn{P= H(H^\prime H)^{-1}H^\prime}, \eqn{H} is the matrix of instruments,
+#' and \eqn{Z} is the matrix of all exogenous and endogenous variables in the model.
+#'
+#' \item If \code{vc = "robust"}, the variance-covariance matrix is estimated by
+#' \eqn{(\hat Z^\prime \hat Z)^{-1}(\hat Z^\prime \hat\Sigma \hat Z) (\hat Z^\prime \hat Z)^{-1}},
+#' where \eqn{\hat\Sigma} is a diagonal matrix with diagonal elements \eqn{\hat\sigma_i},
+#' for \eqn{i=1,...,n}.
+#' \item Finally, if \code{vc = "OGMM"}, the model is estimated in two steps.
+#' In the first step, the model is estimated by 2SLS yielding
+#' the residuals \eqn{\hat \varepsilon}.
+#' With the residuals, the diagonal matrix \eqn{\hat \Sigma} is estimated and is
+#' used to construct the matrix \eqn{\hat S = H^\prime \hat \Sigma H}.
+#' Then \eqn{\eta_{OWGMM}=(Z^\prime H\hat S^{-1}H^\prime Z)^{-1}Z^\prime H\hat S^{-1}H^\prime y}, where \eqn{\eta_{OWGMM}}
+#' is the vector of all the parameters in the model,
+#' The variance-covariance matrix is: \eqn{n(Z^\prime H\hat S^{-1}H^\prime Z)^{-1}}.}
 
 #' @examples
 #' data("natreg")
@@ -69,7 +125,7 @@ ivregimes <- function(formula, data, rgv = NULL,
   res <- tsls_regimes(y, Hmat, Zmat, vc)
 
   res <- list(res, cl, colnames.end.f, colnames.end.v, colnames.instr)
-  class(res) <- "ivregimes"
+  class(res) <- c("spregimes","ivregimes")
   return(res)
 }
 
@@ -87,16 +143,24 @@ tsls_regimes <- function(y, Hmat, Zmat, vc){
   betaiv <- ZpZpi %*% crossprod(Zp, as.matrix(y))
 
   yp <- Zmat %*% betaiv
+  yp <- array(yp, dim = c(length(yp),1),
+              dimnames = list(seq(1, length(yp)), ""))
+
   e  <- as.matrix(y) - yp
+  e <- array(e, dim = c(length(e),1),
+             dimnames = list(seq(1, length(e)), ""))
 
 
   ##simple
   if(vc == "homoskedastic"){
 
     cpe <- crossprod(e)
-    vcmatrix <- (as.numeric(cpe) /df) * solve(crossprod(Zp))
+    vcmatrix <- (as.numeric(cpe) /df) * ZpZpi
+    results <- list(coefficients = betaiv,
+                    var = vcmatrix,
+                    residuals = e,  X = Zmat,
+                    y = y, yp = yp)
 
-    return(list(betaiv, vcmatrix))
   }
 
 
@@ -104,7 +168,10 @@ tsls_regimes <- function(y, Hmat, Zmat, vc){
     e2 <- e^2
     ZoZ <- crossprod(Zp, (as.matrix(Zp) * as.numeric(e2)))
     vcmatrix <-  ZpZpi %*% ZoZ %*% ZpZpi * (n/df)
-    return(list(betaiv, vcmatrix))
+    results <- list(coefficients = betaiv,
+                    var = vcmatrix,
+                    residuals = e,  X = Zmat,
+                    y = y, yp = yp)
 
   }
 
@@ -122,10 +189,13 @@ tsls_regimes <- function(y, Hmat, Zmat, vc){
     sp <- ZpH %*% Smati %*% Hpy
     b_OWGMM <- fp %*% sp
     vcmatrix <-  solve(ZpH %*% Smati %*% HpZ)
+    results <- list(coefficients = b_OWGMM,
+                    var = vcmatrix,
+                    residuals = e,  X = Zmat,
+                    y = y, yp = yp)
 
-    return(list(b_OWGMM, vcmatrix))
   }
-
+  return(results)
 }
 
 
@@ -222,88 +292,4 @@ iv.data.prep.regimes <- function(formula, data, rgv){
 
 
 
-### S3 methods ----
-
-#' @rdname ivregimes
-#' @method coef ivregimes
-#' @export
-coef.ivregimes <- function(object, ...){
-  object[[1]][[1]]
-}
-
-
-#' @rdname ivregimes
-#' @method vcov ivregimes
-#' @import stats
-#' @export
-vcov.ivregimes <- function(object, ...){
-  V <- object[[1]][[2]]
-  return(V)
-}
-
-
-#' @rdname ivregimes
-#' @method print ivregimes
-#' @import stats
-#' @export
-print.ivregimes <- function(x,
-                            digits = max(3, getOption("digits") - 3),
-                            ...)
-{
-   cat("Call:\n")
-   print(x[[2]])
-
-   cat("\nCoefficients:\n")
-
-  print.default(format(drop(coef(x)), digits = digits), print.gap = 2,
-                quote = FALSE)
-  cat("\n")
-  invisible(x)
-}
-
-
-
-#' @rdname ivregimes
-#' @method summary ivregimes
-#' @import stats
-#' @export
-summary.ivregimes <- function(object, ...){
-  b                   <- coef(object)
-  std.err             <- sqrt(diag(vcov(object)))
-  z                   <- b / std.err
-  p                   <- 2 * (1 - pnorm(abs(z)))
-  CoefTable           <- cbind(b, std.err, z, p)
-  colnames(CoefTable) <- c("Estimate", "Std. Error", "z-value", "Pr(>|z|)")
-  object$CoefTable    <- CoefTable
-  class(object)       <- c("summary.ivregimes", "ivregimes")
-  return(object)
-}
-
-
-#' @rdname ivregimes
-#' @method print summary.ivregimes
-#' @import stats
-#' @export
-print.summary.ivregimes <- function(x,
-                                    digits = max(5, getOption("digits") - 3),
-                                    ...)
-{
-  cat("                ------------------------------------\n")
-  cat("                          IV Regimes Model \n")
-  cat("                ------------------------------------\n")
-   cat("\nCall:\n")
-   cat(paste(deparse(x[[2]]), sep = "\n", collapse = "\n"), "\n\n", sep = "")
-
-   cat("\nCoefficients:\n")
-  printCoefmat(x$CoefTable, digits = digits, P.values = TRUE, has.Pvalue = TRUE)
-
-  cat("\nEndogenous variables:\n")
-
-  cat(paste(x[[3]], x[[4]], sep=" "))
-
-  cat("\nInstruments:\n")
-
-  cat(paste(x[[5]], sep=" "))
-  invisible(x)
-}
 

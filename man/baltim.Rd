@@ -24,8 +24,6 @@ A data frame with 211 rows and 17 variables:
   \item{SQFT}{interior living space in hundreds of square feet}
   \item{X}{X coordinate on the Maryland grid}
   \item{Y}{Y coordinate on the Maryland grid}
-
-  ...
 }
 }
 \source{
