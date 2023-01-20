@@ -1,7 +1,7 @@
 Package: hspm
 Type: Package
 Title: Heterogeneous Spatial Models
-Date: 2022-11-14
+Date: 2023-01-19
 Version: 1.0-1
 Authors@R: c(person("Gianfranco", "Piras", role = c("aut", "cre"), 
                     email = "gpiras@mac.com", 
