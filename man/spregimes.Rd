@@ -82,17 +82,19 @@ where \code{y} is the dependent variable,
 An object of class ``\code{spregimes}''
 }
 \description{
-The function \code{spregimes} deals with the estimation of spatial regime models.
+The function \code{spregimes} deals
+with the estimation of spatial regimes models.
 This is a general function that allows the estimation
-of various spatial specifications, including the spatial lag regime model,
-the spatial error regime model, and the spatial SARAR regime model.
+of various spatial specifications, including the spatial lag regimes model,
+the spatial error regimes model, and the spatial SARAR regimes model.
 Since the estimation is based on generalized method of moments (GMM),
-endogenous variables can be included of the model. For further information on estimation, see details.
+endogenous variables can be included.
+For further information on estimation, see details.
 }
 \details{
 The function \code{spregimes} is a wrapper that allows the
 estimation of a general
-spatial regime model.
+spatial regimes model.
 For convenience and without loss of generality,
 we assume the presence of only two regimes.
 In this case the general model can be written as:
@@ -176,12 +178,12 @@ The function
 specifications deriving from this model.
 There are, however, some restrictions.
 For example, if \code{weps_rg} is set to TRUE,
-all the regressors in the model should also vary by regime.
+all the regressors in the model should also vary by regimes.
 The estimation of the different models relies heavily
 on code available from the package \pkg{sphet}.
 
 \enumerate{
-\item For the spatial lag (or Durbin) regime model (i.e, when \eqn{\rho_1}
+\item For the spatial lag (or Durbin) regimes model (i.e, when \eqn{\rho_1}
 and \eqn{\rho_2} are zero), an instrumental variable
 procedure is adopted, where the matrix of instruments
 is formed by the spatial lags of the exogenous variables
@@ -190,16 +192,16 @@ A robust estimation
 of the variance-covariance matrix can be obtained
 by setting \code{het = TRUE}.
 
-\item For the spatial error regime model (i.e, when \eqn{\lambda_1}
+\item For the spatial error regime models (i.e, when \eqn{\lambda_1}
 and \eqn{\lambda_2} are zero), the spatial
 coefficient(s)
 are estimated with the GMM procedure described
 in Kelejian and Prucha (2010) and Drukker et al., (2013).
 The difference between Kelejian and Prucha (2010) and Drukker et al., (2013),
-is that the former assumes heteroskedastic innovations (\code{het = TRUE}),
+is that the former assume heteroskedastic innovations (\code{het = TRUE}),
 while the latter does not (\code{het = FALSE}).
 
-\item For the SARAR regime model, the estimation procedure
+\item For the SARAR regimes model, the estimation procedure
 alternates a series of IV and GMM steps. The variance-covariance
 can be estimated assuming that the innovations are homoskedastic (\code{het = FALSE})
 as well as heteroskedastic (\code{het = TRUE}).
