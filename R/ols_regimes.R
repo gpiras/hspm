@@ -16,11 +16,11 @@ ols_regimes <- function(formula, data, listw, rgv,
   Zmat     <- intro[[3]]
   colnames.end   <- intro[[4]]
   colnames.instr <- intro[[5]]
-
+ dur       <- intro[[9]]
 
 
   res <- spatial.ivreg.regimes(as.matrix(y), as.matrix(Zmat), as.matrix(Hmat), het)
-  res <- list(res, cl, colnames.end,  colnames.instr)
+  res <- list(res, cl, colnames.end,  colnames.instr, dur)
   class(res) <- c("spregimes", "ols_regimes")
 
 
@@ -109,7 +109,9 @@ ols.data.prep.regimes <- function(formula, data, rgv, listw,
   if(any(nmwx == "(Intercept)")) {
     wx <- as.matrix(wx[,-which(colnames(wx) == "(Intercept)")])
     colnames(wx) <- nmwx[-which(nmwx == "(Intercept)")]
-    }
+  }
+  if(ncol(wx) != 0) dur <- TRUE
+  else dur <- FALSE
    nameswx <-  colnames(wx)
   #check if Durbin are fixed or variable
   xfd  <- wx[,(nameswx %in% namesxf), drop = FALSE]
@@ -197,6 +199,7 @@ if(!is.null(namesH)){
   end.v <- Xv[, !(colnames(Xv) %in% colnames(Zv)), drop = FALSE]
   colnames.end.f <- colnames(end.f)
   colnames.end.v <- colnames(end.v)
+  #endogenous lagged (only needed for summary)
   end.fl <- xfd[, (colnames(xfd) %in% colnames(end.f)), drop = FALSE]
   end.vl <- xvd[, (colnames(xvd) %in% colnames(end.v)), drop = FALSE]
   col.end.f.l <- colnames(end.fl)
@@ -320,9 +323,10 @@ else   colinst <- c("X", "WX", nameInst, nameswhf, nameswhv)
     Hmat <- Zmat
     endog <- NULL
     colinst <-  NULL
+
   }
   ret <- list(y = y, Hmat = Hmat, Zmat = Zmat, endog = endog,
-              instrum = colinst, l.split = l.split, Ws = Ws, nameswx)
+              instrum = colinst, l.split = l.split, Ws = Ws, nameswx, dur = dur)
   return(ret)
 }
 

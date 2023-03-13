@@ -175,6 +175,8 @@ for (i in 1: sv) WxvD[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (xvD[,seq_1[i]:s
   nameszv <-  colnames(Zv)
   namesH <- c(nameszf, nameszv)
 
+if(!is.null(namesH)){
+
   if(any(nameszf == "(Intercept)") && any(nameszv == "(Intercept)"))
     stop("(Intercept) cannot  be specified as fixed and variable instruments at the same time!")
 
@@ -248,10 +250,10 @@ for (i in 1: sv) WxvD[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (xvD[,seq_1[i]:s
   ### 3) esog in both
   x.ff <- Xf[, (colnames(Xf) %in% colnames(Zf)), drop = FALSE]
   x.vv <- Xv[, (colnames(Xv) %in% colnames(Zv)), drop = FALSE]
- if(any(colnames(x.ff) == "(Intercept)")) x.f <- x.ff[,-which(colnames(x.ff) == "(Intercept)")]
-  else x.f <- x.ff
-  if(any(colnames(x.vv) == "(Intercept)")) x.v <- x.vv[,-which(colnames(x.vv) == "(Intercept)")]
-  else x.v <- x.vv
+  if(any(colnames(x.ff) == "(Intercept)")) x.f <- x.ff[,-which(colnames(x.ff) == "(Intercept)")]
+   else x.f <- x.ff
+   if(any(colnames(x.vv) == "(Intercept)")) x.v <- x.vv[,-which(colnames(x.vv) == "(Intercept)")]
+   else x.v <- x.vv
   if(dim(x.f)[2] != 0){
     namesx.f <- colnames(x.f)
     nameswx.f <- paste("W_",namesx.f, sep="")
@@ -272,7 +274,7 @@ for (i in 1: sv) WxvD[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (xvD[,seq_1[i]:s
     namesx.f <-  namesx.v <- nameswx.f <- nameswwx.f <- NULL
   }
 Hx.fne <- cbind(x.ff, Wx.f, WWx.f, WWWx.f, instr.F)
-
+#Hx.fne <- cbind(x.f, Wx.f, WWx.f, WWWx.f, instr.F)
  if(dim(x.v)[2] != 0 ){
      namesx.vv <- colnames(x.vv)
      namesx.VV <-  paste(namesx.vv, rep(1:sv, each = length(namesx.vv)), sep = "_")
@@ -367,6 +369,7 @@ if(dim(whv)[2] != 0){
  }
 
  Hmat <- cbind(Hx.fne, Hx.vne, winsf, WhvD)
+
  Hmat <- Hmat[, qr(Hmat)$pivot[seq_len(qr(Hmat)$rank)]]
 
 colinstr <- c(nameInst, nameswhf, nameswhv)
@@ -384,6 +387,86 @@ if(!is.null(colinstr)) {
     if(!is.null(namesd)) colinst <- c("X", "WX","WWX","WWWX")
     else colinst <- c("X", "WX","WWX")
     }
+
+}
+  else{
+
+    x.ff <- Xf
+    x.vv <- Xv
+
+    if(any(colnames(x.ff) == "(Intercept)")) x.f <- x.ff[,-which(colnames(x.ff) == "(Intercept)")]
+    else x.f <- x.ff
+    if(any(colnames(x.vv) == "(Intercept)")) x.v <- x.vv[,-which(colnames(x.vv) == "(Intercept)")]
+    else x.v <- x.vv
+
+
+    if(dim(x.f)[2] != 0){
+      namesx.f <- colnames(x.f)
+      nameswx.f <- paste("W_",namesx.f, sep="")
+      nameswwx.f <- paste("WW_",namesx.f, sep="")
+      Wx.f <- Ws %*% x.f
+      colnames(Wx.f) <- nameswx.f
+      WWx.f <- Ws %*% Wx.f
+      colnames(WWx.f) <- nameswwx.f
+      if(dim(xfd)[2] !=0){
+        WWWx.f <- Ws %*% WWx.f[,which(nameswx %in% namesxfd), drop = F]
+        WWWx.f <- as.matrix(WWWx.f)
+        colnames(WWWx.f) <- paste("WWW_", namesxfd, sep="")
+      }
+      else WWWx.f <- matrix(nrow = n, ncol = 0)
+    }
+    else {
+      Wx.f <-  WWx.f <- WWWx.f <- matrix(nrow = n, ncol = 0)
+      namesx.f <-  namesx.v <- nameswx.f <- nameswwx.f <- NULL
+    }
+
+    Hx.fne <- cbind(x.ff, Wx.f, WWx.f, WWWx.f)
+
+
+    if(dim(x.v)[2] != 0 ){
+      namesx.vv <- colnames(x.vv)
+      namesx.VV <-  paste(namesx.vv, rep(1:sv, each = length(namesx.vv)), sep = "_")
+      x.VV <- XV[,which(namesxV %in% namesx.VV), drop = F]
+      namesx.v <- colnames(x.v)
+      namesx.V <-  paste(namesx.v, rep(1:sv, each = length(namesx.v)), sep = "_")
+      x.V <- XV[,which(namesxV %in% namesx.V), drop = F]
+      Wx.V <- matrix(0, ncol = ncol(x.V), nrow = n)
+      seq_1 <- seq(1, ncol(x.V), (ncol(x.V)/sv))
+      seq_2 <- seq(ncol(x.V)/sv, ncol(x.V),ncol(x.V)/sv)
+      for(i in 1:sv)  Wx.V[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (x.V[,seq_1[i]:seq_2[i]])))
+      nameswx.V <- paste("W_",colnames(x.V), sep="")
+      colnames(Wx.V) <- nameswx.V
+      WWx.V <- matrix(0, ncol = ncol(x.V), nrow = n)
+      for (i in 1: sv) WWx.V[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (Wx.V[,seq_1[i]:seq_2[i]])))
+      nameswwx.V <- paste("WW_",colnames(x.V), sep="")
+      colnames(WWx.V) <- nameswwx.V
+      WWx.Vfd <- WWx.V[,which(namesx.V %in% colnames(xvD))]
+      if(dim(WWx.Vfd)[2] != 0){
+        seq_1 <- seq(1, ncol(WWx.Vfd),ncol(WWx.Vfd)/ sv)
+        seq_2 <- seq(ncol(WWx.Vfd)/ sv, ncol(WWx.Vfd),  ncol(WWx.Vfd)/ sv)
+        WWWx.V <- matrix(0, ncol = ncol(WWx.Vfd), nrow = n)
+        for (i in 1:sv) WWWx.V[,seq_1[i]:seq_2[i]] <-  as.matrix((Ws %*% (WWx.Vfd[,seq_1[i]:seq_2[i]])))
+        nameswwwx.V <- paste("W",colnames(WWx.Vfd), sep="")
+        colnames(WWWx.V) <- nameswwwx.V
+      }
+      else WWWx.V <- matrix(nrow = n, ncol = 0)
+    }
+    else{
+      x.VV <- Wx.V <- WWx.V <-  WWWx.V <- matrix(nrow = n, ncol = 0)
+    }
+    Hx.vne <- cbind(x.VV, Wx.V, WWx.V, WWWx.V)
+
+    Hmat <- cbind(Hx.fne, Hx.vne)
+    endog <- NULL
+    colinstr <- NULL
+
+    if(!is.null(namesd)) colinst <- c("X", "WX","WWX", "WWWX")
+    else colinst <- c("X", "WX","WWX")
+
+    colnames.end.f <- colnames.end.V<- col.end.f.l <- colnames.end.vl  <- NULL
+  }
+
+
 
  ret <- list(y = y, Hmat = Hmat, Zmat = Zmat, endog = list(colnames(wy), colnames.end.f, colnames.end.V, col.end.f.l, colnames.end.vl),
               instrum = colinst, l.split = l.split, ws = Ws, colinstr = colinstr, nameswx = nameswx)

@@ -131,11 +131,19 @@ print.summary.spregimes <- function(x,
         printCoefmat(x$CoefTable, digits = digits, P.values = TRUE, has.Pvalue = TRUE)
       }
       else{
+        if(isTRUE(x[[6]])){
         cat("\n ")
         cat("                 ----------------------------------------\n")
         cat("                       Spatial Error Regimes Model        \n")
         cat("                     with spatially lagged regressors        \n")
         cat("                 ----------------------------------------\n")
+        }
+        else{
+          cat("\n ")
+          cat("               -----------------------------------\n")
+          cat("                   Spatial Error Regimes Model       \n")
+          cat("               -----------------------------------\n")
+        }
         cat("\nCall:\n")
         cat(paste(deparse(x[[2]]), sep = "\n", collapse = "\n"), "\n\n", sep = "")
 
@@ -303,9 +311,18 @@ print.summary.spregimes <- function(x,
 
     else{
       cat("\n")
+      if(isTRUE(unlist(x[[5]]))){
       cat("        ------------------------------------------------------------\n")
       cat("                Regimes Model with spatially lagged regressors      \n")
       cat("        ------------------------------------------------------------\n")
+      }
+      else{
+        cat("\n")
+        cat("                 --------------------------------\n")
+        cat("                           Regimes Model \n")
+        cat("                 --------------------------------\n")
+
+      }
       cat("\nCall:\n")
       cat(paste(deparse(x[[2]]), sep = "\n", collapse = "\n"), "\n\n", sep = "")
 

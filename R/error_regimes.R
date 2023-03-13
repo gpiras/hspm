@@ -20,6 +20,7 @@ intro <- ols.data.prep.regimes(formula, data = data, listw = listw, rgv = rgv,
   n              <- dim(Ws)[1]
   sv             <- l.split[[3]]
   nameswx        <- intro[[8]]
+  dur            <- intro[[9]]
 
   f.step <- spatial.ivreg.regimes(as.matrix(y), as.matrix(Zmat), as.matrix(Hmat), het)
   ubase  <- f.step[[3]]
@@ -52,7 +53,7 @@ intro <- ols.data.prep.regimes(formula, data = data, listw = listw, rgv = rgv,
 
 
 
- res    <- list(pippo, cl, colnames.end,  colnames.instr, nameswx)
+ res    <- list(pippo, cl, colnames.end,  colnames.instr, nameswx, dur)
 #print(res)
 class(res) <- c("spregimes", "error_regimes")
 return(res)

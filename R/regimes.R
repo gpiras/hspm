@@ -123,11 +123,11 @@ groupwise.regimes <- function(formula, data, k, k1, k2, rgm, sv){
   for (i in 1: sv) omega[which(as.numeric(rgm[,i])==1)] <-  1/(crossprod(residuals(fs)[which(as.numeric(rgm[,i])==1)])/(nobsg[i]-df))
 
   data$omega <- omega
+
   res <-  lm(formula, data, weights = omega)
   # uhat <- vector("numeric", length = nrow(data))
   # for (i in 1: sv) uhat[which(as.numeric(rgm[,i])==1)] <-  residuals(lm(formula, data[which(as.numeric(rgm[,i])==1),] ))
   # fs$residuals <- uhat
-
 
   return(res)
 }
