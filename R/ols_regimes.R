@@ -16,10 +16,16 @@ ols_regimes <- function(formula, data, listw, rgv,
   Zmat     <- intro[[3]]
   colnames.end   <- intro[[4]]
   colnames.instr <- intro[[5]]
- dur       <- intro[[9]]
-
+  dur       <- intro[[9]]
+  ct <- intro[[6]][[6]]
 
   res <- spatial.ivreg.regimes(as.matrix(y), as.matrix(Zmat), as.matrix(Hmat), het)
+
+#print(colnames.end)
+#print(colnames.instr)
+  res <- Matchgroups(res, ct)
+  colnames.end <- Matchnames(colnames.end, ct)
+  colnames.instr <- Matchnames(colnames.instr, ct)
   res <- list(res, cl, colnames.end,  colnames.instr, dur)
   class(res) <- c("spregimes", "ols_regimes")
 
@@ -43,8 +49,12 @@ ols.data.prep.regimes <- function(formula, data, rgv, listw,
   svm              <- as.numeric(unique(splitvar))
   rgm              <-  matrix(,nrow = nrow(data), ncol = 0)
   for(i in svm)    rgm <- cbind(rgm, ifelse(splitvar ==  i, 1, 0))
+  mt                <- cbind(1:sv, as.numeric(unique(splitvar)))
+  ct                <- as.numeric(mt[order(mt[,2], decreasing = F),1])
+  ct                <- cbind(ct, svm)
 
-  l.split <- list(n, splitvar, sv, svm, rgm)
+  l.split <- list(n, splitvar, sv, svm, rgm, ct)
+
   #define w matrix
   if(!inherits(listw,c("listw", "Matrix", "matrix"))) stop("listw format unknown")
   if(inherits(listw,"listw"))  Ws <- listw2dgCMatrix(listw)
@@ -93,7 +103,7 @@ ols.data.prep.regimes <- function(formula, data, rgv, listw,
     seq_1 <- seq(1, totc, k2)
     seq_2 <- seq(k2, totc,  k2)
     for(i in 1:sv) XV[,seq_1[i]:seq_2[i]] <- Xv * rgm[,i]
-    namesxV <- paste(namesxv,rep(1:sv,each = k2), sep = "_")
+    namesxV <- paste(namesxv, rep(1:sv, each = k2), sep = "_")
     colnames(XV) <- namesxV
   }
 
@@ -131,7 +141,7 @@ ols.data.prep.regimes <- function(formula, data, rgv, listw,
 
   ### if x varies wx varies
   if(dim(xvd)[2] != 0){
-    namesxvD <- paste(namesxvd,rep(1:sv,each = ncol(xvd)), sep = "_")
+    namesxvD <- paste(namesxvd,rep(1:sv, each = ncol(xvd)), sep = "_")
     xvD  <- XV[, which(namesxV %in% namesxvD), drop = FALSE]
     WxvD <- matrix(0, ncol = ncol(xvD), nrow = n)
     seq_1 <- seq(1, ncol(xvD), ncol(xvD)/sv)
@@ -177,17 +187,20 @@ if(!is.null(namesH)){
     stop("(Intercept) in instruments should vary")
 
   if(!("(Intercept)" %in% c(nameszf, nameszv)))
-    warning("The model has been specified without an intercept but the instruments include the intercept")
+    warning("The model has been specified without an intercept
+            but the instruments include the intercept")
 
   if(dim(Zv)[2] != 0){
+
     k3 <- dim(Zv)[2]
     totz <- sv*k3
     ZV <- matrix(0, ncol = totz, nrow = n)
     seq_1 <- seq(1, totz, k3)
     seq_2 <- seq(k3, totz,  k3)
     for(i in 1:sv) ZV[,seq_1[i]:seq_2[i]] <- Zv * rgm[,i]
-    nameszv <- paste(nameszv,rep(1:sv,each = k3), sep = "_")
+    nameszv <- paste(nameszv,rep(1:sv, each = k3), sep = "_")
     colnames(ZV) <- nameszv
+
   }
   else{
     ZV <- matrix(nrow = n, ncol = 0)
@@ -203,11 +216,13 @@ if(!is.null(namesH)){
   end.fl <- xfd[, (colnames(xfd) %in% colnames(end.f)), drop = FALSE]
   end.vl <- xvd[, (colnames(xvd) %in% colnames(end.v)), drop = FALSE]
   col.end.f.l <- colnames(end.fl)
-  if (dim(end.v)[2] != 0) colnames.end.V <- paste(colnames.end.v, rep(1:sv, each = length(colnames(end.vl))) , sep = "_")
+  if (dim(end.v)[2] != 0) colnames.end.V <- paste(colnames.end.v,
+                                                  rep(1:sv, each = length(colnames(end.vl))) , sep = "_")
   else colnames.end.V <- NULL
   if(!is.null(colnames(end.fl))) colnames.end.fl <- paste("W_",colnames(end.fl), sep ="")
   else colnames.end.fl <- NULL
-  if(!is.null(colnames(end.vl))) colnames.end.vl <- paste("W_", paste(colnames(end.vl), rep(1:sv,each = length(colnames(end.vl))), sep = "_"), sep = "")
+  if(!is.null(colnames(end.vl))) colnames.end.vl <- paste("W_", paste(colnames(end.vl),
+                                                                      rep(1:sv, each = length(colnames(end.vl))), sep = "_"), sep = "")
   else colnames.end.vl <- NULL
 
 
@@ -215,14 +230,15 @@ if(!is.null(namesH)){
   # add the external instr
   instr.F <- Zf[ , !(colnames(Zf) %in% colnames(Xf)), drop = FALSE]
   instr.V <- Zv[ , !(colnames(Zv) %in% colnames(Xv)), drop = FALSE]
-   if(dim(instr.V)[2] != 0){
+
+  if(dim(instr.V)[2] != 0){
     k3 <- dim(instr.V)[2]
     totz <- sv*k3
     instr.VV <- matrix(0, ncol = totz, nrow = n)
     seq_1 <- seq(1, totz, k3)
     seq_2 <- seq(k3, totz,  k3)
     for(i in 1:sv) instr.VV[,seq_1[i]:seq_2[i]] <- instr.V * rgm[,i]
-    colnames(instr.VV) <- paste(colnames(instr.V), rep(1:sv,each = k3), sep = "_")
+    colnames(instr.VV) <- paste(colnames(instr.V), rep(1:sv, each = k3), sep = "_")
   }
   else{
     instr.VV <- matrix(nrow = n, ncol = 0)
@@ -230,7 +246,8 @@ if(!is.null(namesH)){
   }
   namesinstr.F <- colnames(Zf[ , !(colnames(Zf) %in% colnames(Xf)), drop = FALSE])
   namesinstr.V <- colnames(Zv[ , !(colnames(Zv) %in% colnames(Xv)), drop = FALSE])
-  if(length(namesinstr.V) !=0) namesinstr.VV <-  paste(namesinstr.V, rep(1:sv,each = length(namesinstr.V)) , sep = "_")
+  if(length(namesinstr.V) !=0) namesinstr.VV <-  paste(namesinstr.V,
+                                                       rep(1:sv, each = length(namesinstr.V)) , sep = "_")
   else namesinstr.VV <- NULL
   ##need to for pinting and check identification
   nameInsts <- c(namesinstr.F, namesinstr.V)
@@ -246,7 +263,8 @@ Hx.fne <- cbind(x.f, Wxf,instr.F)
     x.V <- XV[,which(namesxV %in% namesx.V), drop = F]
     }
 
-    if(length(colnames.end.V) != 0) colnames.end.V <- paste(colnames.end.v, rep(1:sv, each = length(colnames.end.v)), sep = "_")
+    if(length(colnames.end.V) != 0) colnames.end.V <- paste(colnames.end.v,
+                                                            rep(1:sv, each = length(colnames.end.v)), sep = "_")
     else colnames.end.V <- NULL
 Hx.vne <- cbind(x.V, WxvD, instr.VV)
 
@@ -284,7 +302,7 @@ Hx.vne <- cbind(x.V, WxvD, instr.VV)
 
     if(dim(whv)[2] != 0){
       nameswhv <- colnames(whv)
-      nameswhV <- paste(nameswhv,rep(1:sv,each = ncol(whv)), sep = "_")
+      nameswhV <- paste(nameswhv,rep(1:sv, each = ncol(whv)), sep = "_")
       hvD  <- ZV[, which(nameszv %in% nameswhV), drop = FALSE]
       WhvD <- matrix(0, ncol = ncol(hvD), nrow = n)
       seq_1 <- seq(1, ncol(hvD), sv)
@@ -325,8 +343,56 @@ else   colinst <- c("X", "WX", nameInst, nameswhf, nameswhv)
     colinst <-  NULL
 
   }
+
+
+
   ret <- list(y = y, Hmat = Hmat, Zmat = Zmat, endog = endog,
               instrum = colinst, l.split = l.split, Ws = Ws, nameswx, dur = dur)
   return(ret)
 }
 
+Matchnames <- function(nms, ct){
+nms <- unlist(nms)
+ct <- data.frame(id = letters[ct[,1]], gv = ct[,2])
+
+place <- vector(mode = "list", length = nrow(ct))
+hold <- vector(mode = "list", length = nrow(ct))
+mhold <- vector(mode = "list", length = nrow(ct))
+mholdr <- vector(mode = "list", length = nrow(ct))
+
+for (i in 1: nrow(ct)) {
+  place[[i]] <- which(endsWith(nms, paste0('_', match(ct$id[i] , letters) )))
+  hold[[i]] <-  nms[place[[i]]]
+  mhold[[i]] <- substr(hold[[i]], 1, nchar(hold[[i]])-2)
+  mholdr[[i]] <- paste0(mhold[[i]], "_", ct$gv[i])
+}
+
+for(i in 1:nrow(ct)) nms[place[[i]]] <- mholdr[[i]]
+
+  return(nms)
+}
+
+Matchgroups <- function(res, ct){
+
+  ct <- data.frame(id = letters[ct[,1]], gv = ct[,2])
+
+hold <- list()
+
+
+place <- vector(mode = "list", length = nrow(ct))
+hold <- vector(mode = "list", length = nrow(ct))
+mhold <- vector(mode = "list", length = nrow(ct))
+mholdr <- vector(mode = "list", length = nrow(ct))
+
+for (i in 1: nrow(ct)) {
+place[[i]] <- which(endsWith(rownames(res$coefficients), paste0('_', match(ct$id[i] , letters) )))
+hold[[i]] <- rownames(res$coefficients)[place[[i]]]
+mhold[[i]] <- substr(hold[[i]], 1, nchar(hold[[i]])-2)
+mholdr[[i]] <- paste0(mhold[[i]], "_", ct$gv[i])
+}
+
+for(i in 1:nrow(ct)) rownames(res$coefficients)[place[[i]]] <- mholdr[[i]]
+
+
+  return(res)
+}

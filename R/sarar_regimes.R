@@ -16,6 +16,7 @@ sarar_regimes <- function(formula, data, listw,  rgv, het,
   colinstr <- intro[[8]]
   n <- dim(Ws)[1]
   sv <- l.split[[3]]
+  ct       <- intro[[6]][[6]]
 
 
   f.step <- spatial.ivreg.regimes(as.matrix(y), as.matrix(Zmat), as.matrix(Hmat), het)
@@ -39,6 +40,7 @@ sarar_regimes <- function(formula, data, listw,  rgv, het,
   delta <- out[[1]]
   utildeb <- out[[2]]
   ##calculates the vc matrix final
+
   res <- error_efficient_regime(Ws = Ws, utildeb = utildeb,
                                 n = n, weps_rg = weps_rg,
                                 l.split = l.split,
@@ -46,6 +48,10 @@ sarar_regimes <- function(formula, data, listw,  rgv, het,
                                 Hmat = Hmat, Zmat = Zmat,
                                 control = control, het = het,
                                 verbose = verbose, delta = delta, y = y)
+
+  res <- Matchgroups(res, ct)
+  colnames.end <- Matchnames(colnames.end, ct)
+  colnames.instr <- Matchnames(colnames.instr, ct)
 
   res <- list(res, cl, colnames.end,  colnames.instr, colinstr)
   #print(res)
@@ -107,6 +113,7 @@ in.val <- function(weps_rg, initial.value = NULL, Ws, ubase, sv){
 # }
 #
 co_transform_sarar <- function(rhotilde, y, Zmat, Hmat, l.split, Ws, het, wy_rg){
+
   if(length(rhotilde) == 1L){
     yt  <- y - rhotilde * Ws %*% y
     wZmat <- Ws %*% Zmat
@@ -120,18 +127,20 @@ co_transform_sarar <- function(rhotilde, y, Zmat, Hmat, l.split, Ws, het, wy_rg)
     if(!wy_rg) stop("if weps_rg is TRUE also wy_rg should be TRUE")
     sv <- l.split[[3]]
     rgm <- l.split[[5]]
+
     yt  <- matrix(0, nrow = l.split[[1]], ncol = 1 )
     for(i in 1:sv) yt[which(rgm[,i] == 1)]  <- ((y*rgm[,i]) - rhotilde[i] * Ws %*% (y*rgm[,i]))[which(rgm[,i] ==1)]
     #this multiplies each colums of zmat for the corresponding rho
     Zt    <- matrix(0, ncol = ncol(Zmat), nrow = nrow(Zmat))
-    for(i in 1: sv) Zt[,grep(paste("_", i, sep=""), colnames(Zmat))]   <- as.matrix(Zmat[,grep(paste("_", i, sep=""), colnames(Zmat))]) - rhotilde[i] * as.matrix(Ws %*% Zmat[,grep(paste("_", i, sep=""), colnames(Zmat))])
+    for(i in 1:sv) Zt[,grep(paste("_", i, sep=""), colnames(Zmat))]   <- as.matrix(Zmat[,grep(paste("_", i, sep=""), colnames(Zmat))]) - rhotilde[i] * as.matrix(Ws %*% Zmat[,grep(paste("_", i, sep=""), colnames(Zmat))])
     colnames(Zt) <- colnames(Zmat)
-    secondstep <- spatial.ivreg.regimes(y = yt , Zmat = Zt, Hmat = Hmat, het = het)
+
+     secondstep <- spatial.ivreg.regimes(y = yt , Zmat = Zt, Hmat = Hmat, het = het)
     delta <- coefficients(secondstep)
     utildeb <- y - Zmat %*% delta
   }
   rownames(delta) <- colnames(Zmat)
-
+ #print(delta)
   out <- list(delta = delta, utildeb = utildeb)
   return(out)
 }

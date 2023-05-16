@@ -43,6 +43,7 @@ optimfunct_eff_regime <- function (rhopar, v, vcmat, weps_rg,
 gg_het_regime <- function(Ws, u, n, weps_rg, l.split) {
 
   if(weps_rg){
+
     sv <- l.split[[3]]
     svm <- l.split[[4]]
     rgm <- l.split[[5]]
@@ -54,6 +55,7 @@ gg_het_regime <- function(Ws, u, n, weps_rg, l.split) {
 
 
  for(i in 1:sv){
+
 
     ub <- Ws %*% u*rgm[,i]
     ubb <-Ws %*% ub
@@ -211,6 +213,7 @@ psirhorho_hom_regime <- function(rho, residuals, Hmat, Zmat, Ws,
     n <- length(residuals)
     sv <- l.split[[3]]
     rgm <- l.split[[5]]
+    svm <- l.split[[4]]
     trA2A2 <- sum(Ws^2)
     trA2A2I <- Diagonal(n) * (trA2A2/n)
     Qhh <- crossprod(Hmat)/n
@@ -242,8 +245,8 @@ psirhorho_hom_regime <- function(rho, residuals, Hmat, Zmat, Ws,
       sigma2 <- crossprod(epsilon)/n
 #print(head(Zmat))
 #print(grep(paste("_", i, sep=""), colnames(Zmat)))
-      Zstar   <- Zmat[,grep(paste("_", i, sep=""), colnames(Zmat))] - rho[i] * as.matrix(Ws %*% Zmat[,grep(paste("_", i, sep=""), colnames(Zmat))])
-#print(head(Zstar))
+      Zstar   <- Zmat[,grep(paste("_", svm[i], sep=""), colnames(Zmat))] - rho[i] * as.matrix(Ws %*% Zmat[,grep(paste("_", svm[i], sep=""), colnames(Zmat))])
+
       Qhz <- crossprod(Hmat,Zstar)/n
 
       sec.part <- t(Qhz) %*% Qhhi %*% Qhz
@@ -299,7 +302,7 @@ psirhorho_hom_regime <- function(rho, residuals, Hmat, Zmat, Ws,
   }
   else{
     n <- length(residuals)
-    epsilon<- residuals - rho * Ws %*% residuals
+    epsilon <- residuals - rho * Ws %*% residuals
     mu3<- sum(epsilon^3) /n
     mu4<- sum(epsilon^4) /n
     sigma2 <- crossprod(epsilon)/n
@@ -394,6 +397,7 @@ psirhorho_het_regime <-function(rho, residuals, Hmat, Zmat, Ws,
 
     Qhh <- crossprod(Hmat)/n
     Qhhi <- solve(Qhh)
+
     trA2A2 <- sum(Ws^2)
     A1 <- crossprod(Ws)
     diag(A1) <- 0
@@ -408,7 +412,7 @@ psirhorho_het_regime <-function(rho, residuals, Hmat, Zmat, Ws,
     Pmat <- Tmat <- a.vec1 <- a.vec2 <- vector("list", length = sv)
 
     for(i in 1:sv){
-
+    #i <- ct[j]
     epsilon[which(rgm[,i] == 1)]  <- ((residuals*rgm[,i]) - rho[i] * Ws %*% (residuals*rgm[,i]))[which(rgm[,i] ==1)]
     Zstar <- Zmat[,grep(paste("_", i, sep=""), colnames(Zmat))] - rho[i] * as.matrix(Ws %*% Zmat[,grep(paste("_", i, sep=""), colnames(Zmat))])
 
@@ -588,6 +592,7 @@ Omega_het_regime <- function(rho, Pmat, A1, A2, a.vec1, a.vec2,
   n <- length(epsilon)
 
   if(weps_rg){
+
     sv <- l.split[[3]]
     rgm <- l.split[[5]]
     sq_1 <- seq(1, 2*sv, 2)
@@ -628,7 +633,9 @@ Omega_het_regime <- function(rho, Pmat, A1, A2, a.vec1, a.vec2,
   Omegadr <- as.matrix(t(Pmat) %*% Psidr %*% Phirri %*% Jota %*% Omegarr)
   Omega <- cbind(rbind(Omegadd, t(Omegadr)), rbind(Omegadr, Omegarr))/n
   }
+  #print(Omega)
   Omega
+
 }
 
 #####not for error

@@ -260,7 +260,7 @@
 #'
 #' @author Gianfranco Piras and Mauricio Sarrias
 #' @return An object of class ``\code{spregimes}''
-#' @import Formula sphet stats
+#' @import Formula sphet stats stringr
 #' @rawNamespace import(Matrix,  except = c(cov2cor, toeplitz, update))
 #' @export
 

@@ -1,8 +1,8 @@
 Package: hspm
 Type: Package
 Title: Heterogeneous Spatial Models
-Date: 2023-03-13
-Version: 1.1-1
+Date: 2023-04-16
+Version: 1.1-3
 Authors@R: c(person("Gianfranco", "Piras", role = c("aut", "cre"), 
                     email = "gpiras@mac.com", 
                     comment = c(ORCID = "0000-0003-0225-6061")),
@@ -13,10 +13,10 @@ Maintainer: Gianfranco Piras <gpiras@mac.com>
 Description: Spatial heterogeneity can be specified in various ways. 'hspm' is an ambitious project that aims at implementing various methodologies to control for heterogeneity in spatial models. The current version of 'hspm' deals with spatial and (non-spatial) regimes models. In particular, the package allows to estimate a general spatial regimes model with additional endogenous variables, specified in terms of a spatial lag of the dependent variable, the spatially lagged regressors, and, potentially, a spatially autocorrelated error term. Spatial regime models are estimated by instrumental variables and generalized methods of moments (see Arraiz et al., (2010) <doi:10.1111/j.1467-9787.2009.00618.x>, Bivand and Piras, (2015) <doi:10.18637/jss.v063.i18>, Drukker et al., (2013) <doi:10.1080/07474938.2013.741020>, Kelejian and Prucha, (2010) <doi:10.1016/j.jeconom.2009.10.025>).
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.2.2
+RoxygenNote: 7.2.3
 Depends:
   R (>= 4.0)
-Imports: Formula, sphet, stats, spdep, Matrix
+Imports: Formula, sphet, stats, spdep, Matrix, stringr
 Suggests: splm
 License: GPL (>= 2)    
 URL: https://github.com/gpiras/hspm

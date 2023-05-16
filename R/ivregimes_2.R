@@ -121,8 +121,15 @@ ivregimes <- function(formula, data, rgv = NULL,
   colnames.end.f <- intro[[4]]
   colnames.end.v <- intro[[5]]
   colnames.instr <- intro[[6]]
+  ct       <- intro[[7]][[6]]
 
   res <- tsls_regimes(y, Hmat, Zmat, vc)
+
+  res <- Matchgroups(res, ct)
+
+  colnames.end.v <- Matchnames(colnames.end.v, ct)
+  colnames.instr <- Matchnames(colnames.instr, ct)
+
 
   res <- list(res, cl, colnames.end.f, colnames.end.v, colnames.instr)
   class(res) <- c("spregimes","ivregimes")
@@ -203,9 +210,23 @@ iv.data.prep.regimes <- function(formula, data, rgv){
   n                <- dim(data)[1]
   splitvar         <- as.matrix(lm(rgv, data, method="model.frame"))
   sv               <- length(unique(splitvar))
+  svm              <- sort(as.numeric(unique(splitvar)), decreasing = F)
+  rgm              <-  matrix(,nrow = nrow(data), ncol = 0)
+  for(i in svm)    rgm <- cbind(rgm, ifelse(splitvar ==  i, 1, 0))
+
+
+  n                <- dim(data)[1]
+  splitvar         <- as.matrix(lm(rgv, data, method="model.frame"))
+  sv               <- length(unique(splitvar))
   svm              <- as.numeric(unique(splitvar))
   rgm              <-  matrix(,nrow = nrow(data), ncol = 0)
   for(i in svm)    rgm <- cbind(rgm, ifelse(splitvar ==  i, 1, 0))
+  mt                <- cbind(1:sv, as.numeric(unique(splitvar)))
+  ct                <- as.numeric(mt[order(mt[,2], decreasing = F),1])
+  ct                <- cbind(ct, svm)
+
+  l.split <- list(n, splitvar, sv, svm, rgm, ct)
+
 
   F1 <- Formula(formula)
 
@@ -224,7 +245,7 @@ iv.data.prep.regimes <- function(formula, data, rgv){
   ## extract X variable
   Xv <- model.matrix(F1, data = mf, rhs = 2, drop = FALSE)
   namesxv <- colnames(Xv)
-  namesZ <- c(namesxf, namesxv)
+
 
   if(any(namesxf == "(Intercept)") && any(namesxv == "(Intercept)"))
     stop("(Intercept) cannot  be specified as fixed and variable regressor at the same time!")
@@ -237,15 +258,17 @@ iv.data.prep.regimes <- function(formula, data, rgv){
   seq_1 <- seq(1, totc, k2)
   seq_2 <- seq(k2, totc,  k2)
   for(i in 1:sv) XV[,seq_1[i]:seq_2[i]] <- Xv * rgm[,i]
-  namesxv <- paste(namesxv,rep(1:sv,each = k2), sep = "_")
+  namesxv <- paste(namesxv, rep(1:sv, each = k2), sep = "_")
   colnames(XV) <- namesxv
+  namesZ <- c(namesxf, namesxv)
+
 
   ## extract instrument
   Zf <- model.matrix(F1, data = mf, rhs = 3, drop = FALSE)
   nameszf <- colnames(Zf)
   Zv <- model.matrix(F1, data = mf, rhs = 4, drop = FALSE)
   nameszv <- colnames(Zv)
-  namesH <- c(nameszf, nameszv)
+
   if(any(nameszf == "(Intercept)") && any(nameszv == "(Intercept)"))
     stop("(Intercept) cannot  be specified as fixed and variable instruments at the same time!")
 
@@ -264,14 +287,20 @@ iv.data.prep.regimes <- function(formula, data, rgv){
   seq_1 <- seq(1, totz, k3)
   seq_2 <- seq(k3, totz,  k3)
   for(i in 1:sv) ZV[,seq_1[i]:seq_2[i]] <- Zv * rgm[,i]
-  nameszv <- paste(nameszv,rep(1:sv,each = k3), sep = "_")
-  colnames(ZV) <- nameszv
+  nameszV <- paste(nameszv,rep(1:sv,each = k3), sep = "_")
+  namesH <- c(nameszf, nameszV)
+
+
+
 
   ## if instruments check identification
   end.f <- Xf[, !(colnames(Xf) %in% colnames(Zf)), drop = FALSE]
   end.v <- Xv[, !(colnames(Xv) %in% colnames(Zv)), drop = FALSE]
+
   colnames.end.f <- colnames(end.f)
   colnames.end.v <- colnames(end.v)
+  colnames.end.v <- paste(rep(colnames.end.v,  each = sv), "_", 1:sv, sep = "")
+
   # cat("the endogenous fixed variables are ", colnames(end.f), "\n")
   # cat("and the instruments are ", colnames(Zf), "\n")
   #
@@ -283,10 +312,10 @@ iv.data.prep.regimes <- function(formula, data, rgv){
   Zmat <- cbind(as.matrix(Xf), as.matrix(XV))
   colinst <- namesH[-which((namesH %in% namesZ))]
 
-  if(length(colinst) < length(c(colnames.end.f, colnames.end.v)))
+if(length(colinst) < length(c(colnames.end.f, colnames.end.v)))
     stop("Not enough instruments specified: the model is not identified")
 
-  ret <- list(y = y, Hmat = Hmat, Zmat = Zmat, colnames.end.f, colnames.end.v, colinst)
+  ret <- list(y = y, Hmat = Hmat, Zmat = Zmat, colnames.end.f, colnames.end.v, colinst, l.split)
   return(ret)
 }
 

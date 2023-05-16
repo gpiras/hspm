@@ -21,6 +21,7 @@ intro <- ols.data.prep.regimes(formula, data = data, listw = listw, rgv = rgv,
   sv             <- l.split[[3]]
   nameswx        <- intro[[8]]
   dur            <- intro[[9]]
+  ct             <- l.split[[6]]
 
   f.step <- spatial.ivreg.regimes(as.matrix(y), as.matrix(Zmat), as.matrix(Hmat), het)
   ubase  <- f.step[[3]]
@@ -44,16 +45,18 @@ intro <- ols.data.prep.regimes(formula, data = data, listw = listw, rgv = rgv,
 
 #print(delta)
 #print(utildeb)
- pippo   <- error_efficient_regime(Ws = Ws, utildeb = utildeb,
+ res   <- error_efficient_regime(Ws = Ws, utildeb = utildeb,
                                 n = n, weps_rg = weps_rg,
                                 l.split = l.split, rhotilde = rhotilde,
                                 Hmat = Hmat, Zmat = Zmat,
                                 control = control, het = het,
                                 verbose = verbose, delta = delta, y = y)
 
+ res <- Matchgroups(res, ct)
+ colnames.end <- Matchnames(colnames.end, ct)
+ colnames.instr <- Matchnames(colnames.instr, ct)
 
-
- res    <- list(pippo, cl, colnames.end,  colnames.instr, nameswx, dur)
+ res    <- list(res, cl, colnames.end,  colnames.instr, nameswx, dur)
 #print(res)
 class(res) <- c("spregimes", "error_regimes")
 return(res)
@@ -126,11 +129,17 @@ co_transform <- function(rhotilde, y, Zmat, Hmat, l.split, Ws, het){
 
   }
   else{
+
     yt  <- matrix(0, nrow = l.split[[1]], ncol = 1 )
-    for(i in 1:sv) yt[which(rgm[,i] == 1)]  <- ((y*rgm[,i]) - rhotilde[i] * Ws %*% (y*rgm[,i]))[which(rgm[,i] ==1)]
-    #this multiplies each colums of zmat for the corresponding rho
     Zt    <- matrix(0, ncol = ncol(Zmat), nrow = nrow(Zmat))
-    for(i in 1: sv) Zt[,grep(paste("_", i, sep=""), colnames(Zmat))]   <- as.matrix(Zmat[,grep(paste("_", i, sep=""), colnames(Zmat))]) - rhotilde[i] * as.matrix(Ws %*% Zmat[,grep(paste("_", i, sep=""), colnames(Zmat))])
+
+    for(i in 1:sv) {
+
+     yt[which(rgm[,i] == 1)]  <- ((y*rgm[,i]) - rhotilde[i] * Ws %*% (y*rgm[,i]))[which(rgm[,i] ==1)]
+     Zt[,grep(paste("_", i, sep=""), colnames(Zmat))]   <- as.matrix(Zmat[,grep(paste("_", i, sep=""), colnames(Zmat))]) - rhotilde[i] * as.matrix(Ws %*% Zmat[,grep(paste("_", i, sep=""), colnames(Zmat))])
+
+     }
+
     colnames(Zt) <- colnames(Zmat)
 
     secondstep <- spatial.ivreg.regimes(y = yt , Zmat = Zt, Hmat = Hmat, het = het)
@@ -226,28 +235,30 @@ error_efficient_regime <- function(Ws, utildeb, n, weps_rg,
     seq3 <- seq(1, k+sv, k/sv)
     seq4 <- seq(k/sv, k+sv, k/sv)
 
-    deltarho <- vector(mode = "numeric", length = sv+k)
+    deltarho1 <- vector(mode = "numeric", length = sv+k)
 
     for(i in 1:sv) {
-      deltarho[seq1[i]:seq2[i]] <- c(delta[grep(paste("_", i, sep=""), rownames(delta))], rhotilde[i])
-      names(deltarho)[seq1[i]:seq2[i]] <- c(rownames(delta)[grep(paste("_", i, sep=""), rownames(delta))],paste("We_", i, sep = "") )
+      deltarho1[seq1[i]:seq2[i]] <- c(delta[grep(paste("_", i, sep=""), rownames(delta))], rhotilde[i])
+      names(deltarho1)[seq1[i]:seq2[i]] <- c(rownames(delta)[grep(paste("_", i, sep=""), rownames(delta))],paste("We_", i, sep = "") )
     }
 
   }
   else{
-    deltarho <- c(as.numeric(delta), rhofin)
-    names(deltarho) <- c(rownames(delta), "We")
+    deltarho1 <- c(as.numeric(delta), rhofin)
+    names(deltarho1) <- c(rownames(delta), "We")
   }
 
+  deltarho <- matrix(deltarho1, ncol = 1, nrow = length(deltarho1))
+  rownames(deltarho) <- names(deltarho1)
    yp <- Zmat %*% delta
    yp <- array(yp, dim = c(length(yp), 1),
               dimnames = list(seq(1, length(yp)), ""))
    utildeb <- array(utildeb, dim = c(length(utildeb), 1),
                dimnames = list(seq(1, length(utildeb)), ""))
 
-   paps <- list(coefficients = deltarho, var = vcmat,
+   res <- list(coefficients = deltarho, var = vcmat,
                 residuals = utildeb, X = Zmat,
                 y = y, yp = yp)
 
-  return(paps)
+  return(res)
 }

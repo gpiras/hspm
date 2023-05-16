@@ -143,7 +143,7 @@ data.prep.regimes <- function(formula, data, rgv){
 
   splitvar         <- as.matrix(lm(rgv, data, method="model.frame"))
   sv               <- length(unique(splitvar))
-  svm              <- as.numeric(unique(splitvar))
+  svm              <- sort(as.numeric(unique(splitvar)), decreasing = F)
   rgm              <-  matrix(,nrow = nrow(data), ncol = 0)
   for(i in svm)    rgm <- cbind(rgm, ifelse(splitvar ==  i, 1, 0))
 
@@ -168,10 +168,10 @@ data.prep.regimes <- function(formula, data, rgv){
     n <- dim(x1)[1]
     k1 <- dim(x1)[2]
     k2 <- dim(x2)[2]
-    if(any(namesx1 == "(Intercept)")) namesx1[which(namesx1 == "(Intercept)")]  = "Intercept"
-    if(any(namesx == "(Intercept)")) namesx[which(namesx == "(Intercept)")] = "Intercept"
-    namesxr <- paste(namesx,rep(1:sv,each = k2), sep = "_")
+   if(any(namesx1 == "(Intercept)")) namesx1[which(namesx1 == "(Intercept)")]  = "Intercept"
+   if(any(namesx == "(Intercept)")) namesx[which(namesx == "(Intercept)")] = "Intercept"
 
+    namesxr <- paste(namesx, rep(svm, each = k2), sep = "_")
     totc <- sv*k2
     k <- k1 + totc
 
@@ -190,8 +190,16 @@ data.prep.regimes <- function(formula, data, rgv){
     n <- dim(x)[1]
     k <- dim(x)[2]
     namesx <- colnames(x)
-    if(any(namesx == "(Intercept)")) namesx[ which(namesx == "(Intercept)")] = "Intercept"
-    namesxr <- paste(namesx,rep(1:sv,each = k), sep = "_")
+
+    Int    <- FALSE
+    if(any(namesx == "(Intercept)")) {
+      Int <- TRUE
+      namesx[ which(namesx == "(Intercept)")] = "Intercept"
+      Int <- TRUE
+      }
+
+    namesxr <- paste(namesx, rep(svm, each = k), sep = "_")
+
     totc <- sv*k
 
     xr <- matrix(0, ncol = totc, nrow = n)
@@ -203,7 +211,7 @@ data.prep.regimes <- function(formula, data, rgv){
 
     colnames(data) <- c(namey ,namesxr)
 
-    if("Intercept_1" %in% namesxr)  form <- as.formula(paste(namey,"~", paste(names(data)[2:(totc+1)], collapse =  " + "), "-1"))
+    if(isTRUE(Int))  form <- as.formula(paste(namey,"~", paste(names(data)[2:(totc+1)], collapse =  " + "), "-1"))
     else form <- as.formula(paste(namey,"~", paste(names(data)[2:(totc+1)], collapse =  " + ")))
 
   }
