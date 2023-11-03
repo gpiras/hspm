@@ -16,7 +16,7 @@ LazyData: true
 RoxygenNote: 7.2.3
 Depends:
   R (>= 4.0)
-Imports: Formula, sphet, stats, spdep, Matrix, stringr
+Imports: Formula, sphet, stats, spdep, Matrix, stringr, maxLik, methods, plm
 Suggests: splm
 License: GPL (>= 2)    
 URL: https://github.com/gpiras/hspm
