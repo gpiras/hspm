@@ -119,6 +119,8 @@
 #' het = TRUE, wy_rg = TRUE, weps_rg = FALSE)
 #' summary(mod8)
 #' @references
+#' Piras, G., Sarrias, M. (2023) Heterogeneous spatial models in R: spatial regimes models. J Spat Econometrics 4, 4. https://doi.org/10.1007/s43071-023-00034-1
+#'
 #' Arraiz, I. and Drukker, M.D. and Kelejian, H.H. and Prucha, I.R. (2010)
 #'   A spatial Cliff-Ord-type Model with Heteroskedastic Innovations: Small and Large Sample Results,
 #'     \emph{Journal of Regional Sciences}, \bold{50}, pages 592--614.

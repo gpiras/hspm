@@ -94,7 +94,7 @@ hsar2sls <- function(formula,
   Wy <- Wbd %*% y
 
   # Make instruments matrix Q
-  Xins <- spldv:::make.instruments(Wbd, x = X, q = nins) #TODO: Is this correct?
+  Xins <- spldv::make.instruments(Wbd, x = X, q = nins) #TODO: Is this correct?
   H    <- cbind(X, Xins) # NT * p
   # Just linearly independent columns
   H <- H[, qr(H)$pivot[seq_len(qr(H)$rank)]]
